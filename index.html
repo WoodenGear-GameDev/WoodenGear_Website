@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoodenGear — Персональный сайт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="logo">
+            <div class="logo__gears" aria-hidden="true">
+                <img src="assets/img/gear_1.png" alt="" class="logo__gear logo__gear--big">
+                <img src="assets/img/gear_2.png" alt="" class="logo__gear logo__gear--small">
+            </div>
+            <img src="assets/img/wg_logo_text.png" alt="Wooden Gear" class="logo__text">
+        </div>
+    </header>
+
+    <main class="site-main">
+        <section class="hero">
+            <div class="hero__container container">
+                <article class="profile-card">
+                    <h1 class="profile-card__title">Wooden Gear</h1>
+                    <p class="profile-card__tagline">
+                        — шестерёнка, что цепляется зубьями за всё, до чего может дотянуться, и приводит идеи в движение.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="dev">
+            <div class="dev__title">
+                <h1 class="title">Разработка</h1>
+            </div>
+
+            <div class="dev__container">
+                <div class="dev__bg" aria-hidden="true">
+                    <video class="dev__video" autoplay loop muted playsinline poster="assets/img/ToD_poster_bg.jpg">
+                        <source src="assets/video/Dev_bg.mp4" type="video/mp4">
+                    </video>
+                    <div class="dev__overlay"></div>
+                </div>
+
+                <div class="dev__content container">
+                    <ul class="content__gear-cluster" aria-hidden="true">
+                        <li class="content__gear-cluster__item">
+                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
+                            <div class="gear-card">
+                                <img src="assets/img/joystick.svg" alt="" class="gear-card__icon">
+                                <h3 class="gear-card__title">Видеоигры</h3>
+                                <div class="gear-card__list">
+                                    <p class="gear-card__desc">Unity + C#</p>
+                                    <p class="gear-card__desc">Python</p>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="content__gear-cluster__item">
+                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right">
+                            <div class="gear-card">
+                                <img src="assets/img/api.svg" alt="" class="gear-card__icon">
+                                <h3 class="gear-card__title">Приложения</h3>
+                                <div class="gear-card__list">
+                                    <p class="gear-card__desc">Avalonia UI + C#</p>
+                                    <p class="gear-card__desc">Unity + C#</p>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="content__gear-cluster__item">
+                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
+                            <div class="gear-card">
+                                <img src="assets/img/microcontroller.svg" alt="" class="gear-card__icon">
+                                <h3 class="gear-card__title">Микроконтроллеры</h3>
+                                <div class="gear-card__list">
+                                    <p class="gear-card__desc">LEGO Mindstorms</p>
+                                    <p class="gear-card__desc">Arduino</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="dev__actions">
+                        <button type="button" class="dev__more-btn">
+                            <span>Подробнее</span>
+                            <img src="assets/img/more.svg" alt="" class="dev__more-btn-icon">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
