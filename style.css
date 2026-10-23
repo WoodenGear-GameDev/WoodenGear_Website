@@ -15,6 +15,9 @@
     --radius-card: 12px;
     --radius-pill: 20px;
     --gear-anim-speed: 15s;
+    --oil-width: 44px;
+    --oil-flow-duration: 3s;
+    --oil-glow: rgba(0, 0, 0, 0.85);
 }
 
 *,
@@ -380,7 +383,268 @@ body {
     transform: rotate(360deg);
 }
 
+/* ==========================================================================*/
+
+.poetry__stage:has(.poetry__more-btn:hover) {
+    --oil-width: 76px;
+    --oil-flow-duration: 0.8s;
+}
+
+.poetry {
+    width: 100%;
+    margin-top: 60px;
+    position: relative;
+    overflow-x: clip;
+}
+
+.poetry__title {
+    max-width: var(--container-width);
+    margin: 0 auto 30px auto;
+    padding: 0 20px;
+}
+
+.poetry__stage {
+    position: relative;
+    width: 100%;
+    min-height: 1300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 320px;
+    padding-bottom: 140px;
+    overflow: hidden;
+}
+
+.poetry__pipe-wrap {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    width: 620px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.poetry__pipe {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.poetry__oil-stream {
+    position: absolute;
+    top: 360px;
+    right: 490px;
+    
+    width: var(--oil-width);
+    bottom: 30px;
+    z-index: 3;
+
+    background: linear-gradient(
+        180deg,
+        #040405 0%,
+        #18181b 18%,
+        #3f3f46 30%,
+        #09090b 46%,
+        #27272a 68%,
+        #040405 100%
+    );
+    background-size: 100% 280px;
+    background-position: 0 var(--oil-pos, 0px);
+
+    transform: translateX(50%);
+    transition: width 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+
+    border-radius: 14px;
+    box-shadow: 
+        inset 6px 0 10px rgba(255, 255, 255, 0.08),
+        inset -8px 0 16px rgba(0, 0, 0, 0.95),
+        0 0 20px rgba(0, 0, 0, 0.85);
+}
+
+@keyframes oil-flow-anim {
+    from { background-position: 0 0; }
+    to   { background-position: 0 280px; }
+}
+
+.poetry__wheel-item {
+    position: absolute;
+    width: 580px;
+    height: 580px;
+    
+    top: 500px;
+    right: 450px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4;
+}
+
+.poetry__wheel-mesh {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform-origin: 50% 50%;
+    transform: rotate(var(--wheel-deg, 0deg));
+    will-change: transform;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.poetry__card {
+    position: relative;
+    z-index: 5;
+    width: 320px;
+    height: 320px;
+}
+
+.poetry__actions {
+    position: absolute;
+    width: 580px;
+
+    top: 1100px;
+    right: 450px;
+    
+    align-items: center;
+    z-index: 6;
+}
+
+/* ==========================================================================*/
+
+.oil-ocean__waves {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 95px;
+    z-index: 3;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.oil-ocean__svg {
+    width: 100%;
+    height: 100%;
+    fill: #050506;
+    filter: drop-shadow(0 -6px 12px rgba(0, 0, 0, 0.75));
+}
+
+.oil-ocean {
+    width: 100%;
+    background: linear-gradient(180deg, #050506 0%, #000000 100%);
+    padding: 40px 20px 70px 20px;
+    position: relative;
+    z-index: 3;
+    text-align: center;
+}
+
+.oil-ocean__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.oil-ocean__title {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--color-text-main);
+}
+
+.oil-ocean__link__groups {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.oil-ocean__link__group {
+    display: inline-flex;
+    align-items: center;
+}
+
+.oil-ocean__links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.oil-ocean__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 32px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--color-text-main);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.oil-ocean__link:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.25);
+}
+
+.oil-ocean__copy {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+.oil-ocean__waves {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 105px;
+    z-index: 3;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.oil-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    will-change: transform;
+}
+
+.oil-wave--back {
+    fill: #141418;
+    animation: wave-drift 18s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.oil-wave--front {
+    fill: #050506;
+    filter: drop-shadow(0 -8px 16px rgba(0, 0, 0, 0.9));
+    animation: wave-drift 12s cubic-bezier(0.45, 0.05, 0.55, 0.95) reverse infinite;
+}
+
 /* ========================================================================== */
+
+@keyframes wave-drift {
+    0% {
+        transform: translate3d(0, 0, 0) scaleY(1);
+    }
+    50% {
+        transform: translate3d(-25%, -8px, 0) scaleY(1.12);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0) scaleY(1);
+    }
+}
 
 @keyframes logo-spin-cw {
     from { transform: rotate(0deg); }

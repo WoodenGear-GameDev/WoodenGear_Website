@@ -1,32 +1,62 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cluster = document.querySelector('.content__gear-cluster');
-    const moreBtn = document.querySelector('.dev__more-btn');
+    const devMoreBtn = document.querySelector('.dev__more-btn');
 
-    if (!cluster || !moreBtn) return;
+    let gearAngle = 0;
+    let gearSpeed = 0.2;
+    let gearTargetSpeed = 0.2;
 
-    let currentAngle = 0;
-    let currentSpeed = 0.2;
-    let targetSpeed = 0.2;
-    const baseSpeed = 0.2;
-    const boostSpeed = 1;
-    const acceleration = 0.05;
-
-    moreBtn.addEventListener('mouseenter', () => {
-        targetSpeed = boostSpeed;
-    });
-
-    moreBtn.addEventListener('mouseleave', () => {
-        targetSpeed = baseSpeed;
-    });
-
-    function animateGears() {
-        currentSpeed += (targetSpeed - currentSpeed) * acceleration;
-        currentAngle = (currentAngle + currentSpeed) % 360;
-
-        cluster.style.setProperty('--gear-deg', `${currentAngle}deg`);
-
-        requestAnimationFrame(animateGears);
+    if (devMoreBtn) {
+        devMoreBtn.addEventListener('mouseenter', () => { gearTargetSpeed = 1; });
+        devMoreBtn.addEventListener('mouseleave', () => { gearTargetSpeed = 0.2; });
     }
 
-    animateGears();
+    const wheelMesh = document.querySelector('.poetry__wheel-mesh');
+    const oilStream = document.querySelector('.poetry__oil-stream');
+    const poetryBtn = document.querySelector('.poetry__more-btn');
+
+    let wheelAngle = 0;
+    let wheelSpeed = 0.18;
+    let wheelTargetSpeed = 0.18;
+
+    let oilPos = 0;
+    let oilSpeed = 1.2;
+    let oilTargetSpeed = 1.2;
+
+    const viscosity = 0.015;
+
+    if (poetryBtn) {
+        poetryBtn.addEventListener('mouseenter', () => {
+            wheelTargetSpeed = 0.6;
+            oilTargetSpeed = 3.6;
+        });
+        poetryBtn.addEventListener('mouseleave', () => {
+            wheelTargetSpeed = 0.18;
+            oilTargetSpeed = 1.2;
+        });
+    }
+
+    function loop() {
+        if (cluster) {
+            gearSpeed += (gearTargetSpeed - gearSpeed) * 0.05;
+            gearAngle = (gearAngle + gearSpeed) % 360;
+            cluster.style.setProperty('--gear-deg', `${gearAngle}deg`);
+        }
+
+        if (wheelMesh) {
+            wheelSpeed += (wheelTargetSpeed - wheelSpeed) * viscosity;
+            wheelAngle = (wheelAngle + wheelSpeed) % 360;
+            wheelMesh.style.setProperty('--wheel-deg', `${wheelAngle}deg`);
+        }
+
+        if (oilStream) {
+            oilSpeed += (oilTargetSpeed - oilSpeed) * viscosity;
+            oilPos = (oilPos + oilSpeed) % 280;
+            oilStream.style.setProperty('--oil-pos', `${oilPos}px`);
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    loop();
 });
