@@ -1,3 +1,4 @@
+/* ========================================================================== */
 :root {
     --color-bg-base: #18181b;
     --color-bg-card: rgba(10, 10, 10, 0.5);
@@ -7,17 +8,16 @@
     --color-text-muted: #b6b6bd;
     --color-accent: #d97706;
     
-    --color-tag-bg: rgba(255, 255, 255, 0.06);
-    --color-tag-border: rgba(255, 255, 255, 0.12);
-    
     --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --container-width: 800px;
     --radius-card: 12px;
     --radius-pill: 20px;
-    --gear-anim-speed: 15s;
+
     --oil-width: 44px;
-    --oil-flow-duration: 3s;
-    --oil-glow: rgba(0, 0, 0, 0.85);
+
+    --logo-scale: 1;
+    --dev-scale: 1;
+    --poetry-scale: 1;
 }
 
 *,
@@ -38,8 +38,6 @@ body {
     font-family: var(--font-main);
 }
 
-/* ==========================================================================*/
-
 .container {
     width: 100%;
     max-width: var(--container-width);
@@ -47,13 +45,18 @@ body {
     padding: 0 20px;
 }
 
-/* ==========================================================================*/
+/* ========================================================================== */
+.section-title-wrap {
+    max-width: var(--container-width);
+    margin: 0 auto 24px auto;
+    padding: 0 16px;
+}
 
 .title {
     text-align: center;
-    font-size: 3.5rem;
+    font-size: clamp(1.5rem, 4.5vw, 3.5rem);
     font-weight: 700;
-    letter-spacing: 12px;
+    letter-spacing: clamp(3px, 1vw, 12px);
     text-transform: uppercase;
     color: var(--color-text-main);
     margin-bottom: 20px;
@@ -61,35 +64,27 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
-}
-
-.title__container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow: hidden;
-    margin-top: 20px;
+    gap: clamp(10px, 2vw, 24px);
 }
 
 .title::before,
 .title::after {
     content: "";
     height: 2.5px;
-    width: 130px;
+    width: clamp(30px, 10vw, 130px);
     background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
     opacity: 0.6;
+    flex-shrink: 0;
 }
 
-/* ==========================================================================*/
-
+/* ========================================================================== */
 .site-header {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 20px;
+    padding: clamp(24px, 5vw, 60px) 16px;
     width: 100%;
+    overflow: hidden;
 }
 
 .logo {
@@ -97,12 +92,15 @@ body {
     align-items: center;
     text-decoration: none;
     user-select: none;
+    transform: scale(var(--logo-scale));
+    transform-origin: center center;
 }
 
 .logo__gears {
     position: relative;
     width: 390px;
     height: 345px;
+    flex-shrink: 0;
 }
 
 .logo__gear {
@@ -135,25 +133,17 @@ body {
     margin-left: -130px;
 }
 
-/* ==========================================================================*/
-
+/* ========================================================================== */
 .hero {
-    position: relative;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    overflow: hidden;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .hero__container {
-    position: relative;
-    z-index: 2;
-    margin-top: 40px;
+    margin-top: 20px;
     margin-bottom: 40px;
 }
-
-/* ==========================================================================*/
 
 .profile-card {
     background: var(--color-bg-card);
@@ -163,80 +153,31 @@ body {
 
 .profile-card__title {
     margin-bottom: 12px;
-    font-size: 2.2rem;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
     letter-spacing: 0.5px;
 }
 
 .profile-card__tagline {
     color: var(--color-text-muted);
-    font-size: 1.3rem;
+    font-size: clamp(1rem, 2vw, 1.3rem);
     line-height: 1.5;
     border-left: 3px solid var(--color-accent);
     padding-left: 14px;
-    margin-bottom: 20px;
 }
 
-/* ==========================================================================*/
-
-.content__gear--left {
-    transform: rotate(var(--gear-deg, 0deg));
-    will-change: transform;
-}
-
-.content__gear--right {
-    transform: rotate(calc(-1 * var(--gear-deg, 0deg) + 15deg));
-    will-change: transform;
-}
-
-.dev__container:has(.dev__more-btn:hover) {
-    --gear-anim-speed: 3s;
-}
-
-.content__gear-cluster {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    list-style: none;
-    margin: 20px auto 40px auto;
-    padding: 0;
-}
-
-.content__gear-cluster__item {
-    position: relative;
-    width: 600px;
-    height: 600px;
-    margin: 0 -57px;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.content__gear-mesh {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    transform-origin: 50% 50%;
-    z-index: 1;
-    pointer-events: none;
-}
-
+/* ========================================================================== */
 .gear-card {
     position: relative;
     z-index: 2;
     width: 330px;
     height: 330px;
     border-radius: 50%;
-    
     background: rgba(24, 24, 27, 1);
     backdrop-filter: blur(4px);
     box-shadow: 
         0 4px 25px rgba(0, 0, 0, 0.7),
         inset 0 0 18px rgba(0, 0, 0, 0.85);
     border: 2px solid rgba(255, 255, 255, 0.1);
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -280,74 +221,15 @@ body {
     font-weight: bold;
 }
 
-/* ==========================================================================*/
-
-.dev {
-    width: 100%;
-    margin-top: 40px;
-}
-
-.dev__title {
-    max-width: var(--container-width);
-    margin: 0 auto 24px auto;
-    padding: 0 20px;
-}
-
-.dev__container {
-    position: relative;
-    width: 100%;
-    padding: 60px 0 80px 0;
-    overflow: hidden;
-}
-
-.dev__bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-}
-
-.dev__video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.dev__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(18, 18, 20, 0.75);
-}
-
-.dev__content {
-    position: relative;
-    align-items: center;
-    z-index: 2;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* ==========================================================================*/
-
 .dev__actions {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     z-index: 3;
-    margin-top: 10px;
 }
 
-.dev__more-btn {
+.action-btn {
     display: inline-flex;
     align-items: center;
     gap: 20px;
@@ -366,63 +248,263 @@ body {
     transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.dev__more-btn:hover {
+.action-btn:hover {
     transform: translateY(-2px) scale(1.03);
     border-color: var(--color-accent);
     background: rgba(35, 35, 40, 0.95);
     box-shadow: 0 8px 25px rgba(217, 119, 6, 0.25);
 }
 
-.dev__more-btn-icon {
+.action-btn__icon {
     width: 35px;
     height: 35px;
     transition: transform 0.3s ease;
 }
 
-.dev__more-btn:hover .dev__more-btn-icon {
+.action-btn:hover .action-btn__icon {
     transform: rotate(360deg);
 }
 
-/* ==========================================================================*/
-
-.poetry__stage:has(.poetry__more-btn:hover) {
-    --oil-width: 76px;
-    --oil-flow-duration: 0.8s;
+/* ========================================================================== */
+.dev {
+    width: 100%;
+    margin-top: 40px;
 }
 
+.dev__container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+.dev__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
+.dev__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dev__overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--color-bg-overlay);
+}
+
+.dev__viewport {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: calc(1170px * var(--dev-scale));
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.dev__canvas {
+    width: 1300px;
+    height: 1170px;
+    flex-shrink: 0;
+    transform: scale(var(--dev-scale));
+    transform-origin: top center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 60px;
+}
+
+.content__gear-cluster {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    list-style: none;
+    margin: 0 auto 30px auto;
+    padding: 0;
+}
+
+.content__gear-item {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    margin: 0 -130px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content__gear-item--upper {
+    margin-top: 0;
+}
+
+.content__gear-item--lower {
+    margin-top: 350px;
+}
+
+.content__gear-mesh {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform-origin: 50% 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.content__gear--left {
+    transform: rotate(var(--gear-deg, 0deg));
+    will-change: transform;
+}
+
+.content__gear--right {
+    transform: rotate(calc(-1 * var(--gear-deg, 0deg) + 15deg));
+    will-change: transform;
+}
+
+/* ========================================================================== */
 .poetry {
     width: 100%;
     margin-top: 60px;
     position: relative;
-    overflow-x: clip;
+    overflow: hidden;
 }
 
-.poetry__title {
-    max-width: var(--container-width);
-    margin: 0 auto 30px auto;
-    padding: 0 20px;
+.poetry__stage:has(.poetry__more-btn:hover) {
+    --oil-width: 76px;
 }
 
 .poetry__stage {
     position: relative;
     width: 100%;
-    min-height: 1300px;
+    height: calc(1380px * var(--poetry-scale));
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 320px;
-    padding-bottom: 140px;
+    justify-content: center;
+    align-items: flex-start;
     overflow: hidden;
+}
+
+.poetry__canvas {
+    position: relative;
+    width: 1600px;
+    height: 1380px;
+    flex-shrink: 0;
+    transform: scale(var(--poetry-scale));
+    transform-origin: top center;
+}
+
+.poetry__balloon {
+    position: absolute;
+    top: 40px;
+    left: 80px;
+    width: 760px;
+    height: 760px;
+    z-index: 4;
+    user-select: none;
+    transform-origin: 50% 30%;
+    animation: balloon-float 7s ease-in-out infinite;
+}
+
+.poetry__balloon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+    transform-origin: 50% 35%;
+    transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poetry__burner-glow {
+    position: absolute;
+    top: 73%;
+    left: 50%;
+    width: 90px;
+    height: 90px;
+    transform: translate(-50%, -50%) scale(0.6);
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(251, 191, 36, 0.9) 0%,
+        rgba(217, 119, 6, 0.55) 45%,
+        transparent 75%
+    );
+    filter: blur(12px);
+    opacity: 0.35;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.8s ease, transform 0.8s ease, filter 0.8s ease;
+}
+
+.poetry__balloon-card {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 320px;
+    z-index: 3;
+    transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.poetry__basket-actions {
+    position: absolute;
+    bottom: 6.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+}
+
+.poetry__balloon-btn {
+    padding: 8px 24px;
+    font-size: 1.2rem;
+    gap: 14px;
+    background: rgba(20, 18, 16, 0.92);
+}
+
+.poetry__balloon:has(.poetry__balloon-btn:hover) .poetry__burner-glow {
+    opacity: 1;
+    transform: translate(-50%, -65%) scale(2.4);
+    filter: blur(18px);
+}
+
+.poetry__balloon:has(.poetry__balloon-btn:hover) .poetry__balloon-img {
+    transform: translateY(-20px) scale(1.02);
+}
+
+.poetry__balloon:has(.poetry__balloon-btn:hover) .poetry__balloon-card {
+    transform: translate(-50%, calc(-50% - 20px)) scale(1.02);
+    border-color: rgba(217, 119, 6, 0.5);
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(217, 119, 6, 0.25),
+        inset 0 0 18px rgba(0, 0, 0, 0.85);
 }
 
 .poetry__pipe-wrap {
     position: absolute;
     top: 30px;
     right: 0;
-    width: 620px;
+    width: 500px;
     z-index: 2;
     pointer-events: none;
+
+    -webkit-mask-image: linear-gradient(to right, black 15%, transparent 100%);
+    mask-image: linear-gradient(to right, black 15%, transparent 100%);
 }
 
 .poetry__pipe {
@@ -433,13 +515,11 @@ body {
 
 .poetry__oil-stream {
     position: absolute;
-    top: 360px;
-    right: 490px;
-    
+    top: 300px;
+    right: 410px;
     width: var(--oil-width);
-    bottom: 30px;
+    bottom: 0;
     z-index: 3;
-
     background: linear-gradient(
         180deg,
         #040405 0%,
@@ -451,10 +531,8 @@ body {
     );
     background-size: 100% 280px;
     background-position: 0 var(--oil-pos, 0px);
-
     transform: translateX(50%);
     transition: width 1.8s cubic-bezier(0.25, 1, 0.5, 1);
-
     border-radius: 14px;
     box-shadow: 
         inset 6px 0 10px rgba(255, 255, 255, 0.08),
@@ -462,23 +540,16 @@ body {
         0 0 20px rgba(0, 0, 0, 0.85);
 }
 
-@keyframes oil-flow-anim {
-    from { background-position: 0 0; }
-    to   { background-position: 0 280px; }
-}
-
 .poetry__wheel-item {
     position: absolute;
     width: 580px;
     height: 580px;
-    
     top: 500px;
-    right: 450px;
-    
+    right: 370px;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 4;
+    z-index: 2;
 }
 
 .poetry__wheel-mesh {
@@ -504,32 +575,42 @@ body {
 .poetry__actions {
     position: absolute;
     width: 580px;
-
     top: 1100px;
-    right: 450px;
-    
-    align-items: center;
+    right: 370px;
     z-index: 6;
 }
 
-/* ==========================================================================*/
-
+/* ========================================================================== */
 .oil-ocean__waves {
     position: absolute;
     bottom: -2px;
     left: 0;
     width: 100%;
-    height: 95px;
-    z-index: 3;
-    overflow: hidden;
+    height: calc(70px * var(--poetry-scale));
+    min-height: 24px;
+    z-index: 5;
     pointer-events: none;
 }
 
-.oil-ocean__svg {
-    width: 100%;
+.oil-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
     height: 100%;
+    display: block;
+    transform-origin: center bottom;
+    will-change: transform;
+}
+
+.oil-wave--back {
+    fill: #121216;
+    animation: wave-drift 16s linear infinite;
+}
+
+.oil-wave--front {
     fill: #050506;
-    filter: drop-shadow(0 -6px 12px rgba(0, 0, 0, 0.75));
+    animation: wave-drift 11s linear reverse infinite;
 }
 
 .oil-ocean {
@@ -549,22 +630,10 @@ body {
 }
 
 .oil-ocean__title {
-    font-size: 1.8rem;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
     letter-spacing: 4px;
     text-transform: uppercase;
     color: var(--color-text-main);
-}
-
-.oil-ocean__link__groups {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.oil-ocean__link__group {
-    display: inline-flex;
-    align-items: center;
 }
 
 .oil-ocean__links {
@@ -583,8 +652,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.14);
     color: var(--color-text-main);
     text-decoration: none;
-    font-size: 1.2rem;
-    font-weight: 600;
     transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -601,49 +668,16 @@ body {
     opacity: 0.6;
 }
 
-.oil-ocean__waves {
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 105px;
-    z-index: 3;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.oil-wave {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 200%;
-    height: 100%;
-    will-change: transform;
-}
-
-.oil-wave--back {
-    fill: #141418;
-    animation: wave-drift 18s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-}
-
-.oil-wave--front {
-    fill: #050506;
-    filter: drop-shadow(0 -8px 16px rgba(0, 0, 0, 0.9));
-    animation: wave-drift 12s cubic-bezier(0.45, 0.05, 0.55, 0.95) reverse infinite;
-}
-
 /* ========================================================================== */
+@keyframes balloon-float {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0.6deg); }
+    50%      { transform: translate3d(0, -16px, 0) rotate(-0.6deg); }
+}
 
 @keyframes wave-drift {
-    0% {
-        transform: translate3d(0, 0, 0) scaleY(1);
-    }
-    50% {
-        transform: translate3d(-25%, -8px, 0) scaleY(1.12);
-    }
-    100% {
-        transform: translate3d(-50%, 0, 0) scaleY(1);
-    }
+    0% { transform: translate3d(0, 0, 0) scaleY(1); }
+    50% { transform: translate3d(-25%, 0, 0) scaleY(1.12); }
+    100% { transform: translate3d(-50%, 0, 0) scaleY(1); }
 }
 
 @keyframes logo-spin-cw {
@@ -654,14 +688,4 @@ body {
 @keyframes logo-spin-ccw {
     from { transform: rotate(0deg); }
     to   { transform: rotate(-360deg); }
-}
-
-@keyframes spin-cw {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
-
-@keyframes spin-ccw {
-    from { transform: rotate(15deg); }
-    to   { transform: rotate(-345deg); }
 }

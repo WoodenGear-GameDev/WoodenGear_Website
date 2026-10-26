@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const root = document.documentElement;
+    const header = document.querySelector('.site-header');
+
+    function updateResponsiveScale() {
+        const vw = window.innerWidth;
+
+        const logoScale = Math.min(1, (vw - 24) / 780);
+        const devScale = Math.min(1, (vw - 16) / 1340);
+        const poetryScale = Math.min(1, vw / 1600);
+
+        root.style.setProperty('--logo-scale', logoScale.toFixed(4));
+        root.style.setProperty('--dev-scale', devScale.toFixed(4));
+        root.style.setProperty('--poetry-scale', poetryScale.toFixed(4));
+
+        if (header) {
+            header.style.height = `${Math.round(345 * logoScale + 48)}px`;
+        }
+    }
+
+    window.addEventListener('resize', updateResponsiveScale);
+    updateResponsiveScale();
+
     const cluster = document.querySelector('.content__gear-cluster');
     const devMoreBtn = document.querySelector('.dev__more-btn');
 

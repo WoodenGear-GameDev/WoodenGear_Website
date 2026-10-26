@@ -31,8 +31,8 @@
         </section>
 
         <section class="dev">
-            <div class="dev__title">
-                <h1 class="title">Разработка</h1>
+            <div class="section-title-wrap">
+                <h2 class="title">Разработка</h2>
             </div>
 
             <div class="dev__container">
@@ -43,94 +43,121 @@
                     <div class="dev__overlay"></div>
                 </div>
 
-                <div class="dev__content container">
-                    <ul class="content__gear-cluster" aria-hidden="true">
-                        <li class="content__gear-cluster__item">
-                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
-                            <div class="gear-card">
-                                <img src="assets/img/joystick.svg" alt="" class="gear-card__icon">
-                                <h3 class="gear-card__title">Видеоигры</h3>
-                                <div class="gear-card__list">
-                                    <p class="gear-card__desc">Unity + C#</p>
-                                    <p class="gear-card__desc">Python</p>
+                <div class="dev__viewport">
+                    <div class="dev__canvas">
+                        <ul class="content__gear-cluster" aria-hidden="true">
+                            <li class="content__gear-item content__gear-item--upper">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
+                                <div class="gear-card">
+                                    <img src="assets/img/joystick.svg" alt="" class="gear-card__icon">
+                                    <h3 class="gear-card__title">Видеоигры</h3>
+                                    <div class="gear-card__list">
+                                        <p class="gear-card__desc">Unity + C#</p>
+                                        <p class="gear-card__desc">Python</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
+                            </li>
 
-                        <li class="content__gear-cluster__item">
-                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right">
-                            <div class="gear-card">
-                                <img src="assets/img/api.svg" alt="" class="gear-card__icon">
-                                <h3 class="gear-card__title">Приложения</h3>
-                                <div class="gear-card__list">
-                                    <p class="gear-card__desc">Avalonia UI + C#</p>
-                                    <p class="gear-card__desc">Unity + C#</p>
+                            <li class="content__gear-item content__gear-item--lower">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right">
+                                <div class="gear-card">
+                                    <img src="assets/img/api.svg" alt="" class="gear-card__icon">
+                                    <h3 class="gear-card__title">Приложения</h3>
+                                    <div class="gear-card__list">
+                                        <p class="gear-card__desc">Avalonia UI + C#</p>
+                                        <p class="gear-card__desc">Unity + C#</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
+                            </li>
 
-                        <li class="content__gear-cluster__item">
-                            <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
-                            <div class="gear-card">
-                                <img src="assets/img/microcontroller.svg" alt="" class="gear-card__icon">
-                                <h3 class="gear-card__title">Микроконтроллеры</h3>
-                                <div class="gear-card__list">
-                                    <p class="gear-card__desc">LEGO Mindstorms</p>
-                                    <p class="gear-card__desc">Arduino</p>
+                            <li class="content__gear-item content__gear-item--upper">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
+                                <div class="gear-card">
+                                    <img src="assets/img/microcontroller.svg" alt="" class="gear-card__icon">
+                                    <h3 class="gear-card__title">Микроконтроллеры</h3>
+                                    <div class="gear-card__list">
+                                        <p class="gear-card__desc">LEGO Mindstorms</p>
+                                        <p class="gear-card__desc">Arduino</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    </ul>
+                            </li>
+                        </ul>
 
-                    <div class="dev__actions">
-                        <button type="button" class="dev__more-btn">
-                            <span>Подробнее</span>
-                            <img src="assets/img/more.svg" alt="" class="dev__more-btn-icon">
-                        </button>
+                        <div class="dev__actions">
+                            <button type="button" class="action-btn dev__more-btn">
+                                <span>Изучить</span>
+                                <img src="assets/img/more.svg" alt="" class="action-btn__icon">
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <section class="poetry">
-            <div class="poetry__title">
-                <h1 class="title">Творчество</h1>
+            <div class="section-title-wrap">
+                <h2 class="title">Творчество</h2>
             </div>
 
             <div class="poetry__stage">
-                <div class="poetry__pipe-wrap" aria-hidden="true">
-                    <img src="assets/img/pipe.webp" alt="" class="poetry__pipe">
-                </div>
-
-                <div class="poetry__oil-stream" aria-hidden="true"></div>
-
-                <div class="poetry__wheel-item">
-                    <img src="assets/img/wheel.webp" alt="" class="poetry__wheel-mesh" aria-hidden="true">
+                <div class="poetry__canvas">
                     
-                    <div class="gear-card poetry__card">
-                        <img src="assets/img/quill.svg" alt="" class="gear-card__icon">
-                        <h3 class="gear-card__title">Стихи и циклы</h3>
-                        <div class="gear-card__list">
-                            <p class="gear-card__desc">WoodenGear — 5 глав</p>
-                            <p class="gear-card__desc">Дождь</p>
-                            <p class="gear-card__desc">Свыше</p>
+                    <div class="poetry__balloon">
+                        <img src="assets/img/ball.webp" alt="" class="poetry__balloon-img" aria-hidden="true">
+                        <div class="poetry__burner-glow" aria-hidden="true"></div>
+
+                        <div class="gear-card poetry__balloon-card">
+                            <img src="assets/img/3d-pen.svg" alt="" class="gear-card__icon">
+                            <h3 class="gear-card__title">3D-ручка</h3>
+                            <div class="gear-card__list">
+                                <p class="gear-card__desc">Фигурки насекомых</p>
+                                <p class="gear-card__desc">Существа из игр</p>
+                                <p class="gear-card__desc">Диорамы</p>
+                            </div>
+                        </div>
+
+                        <div class="poetry__basket-actions">
+                            <button type="button" class="action-btn poetry__balloon-btn">
+                                <span>Смотреть</span>
+                                <img src="assets/img/more.svg" alt="" class="action-btn__icon">
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                <div class="dev__actions poetry__actions">
-                    <button type="button" class="dev__more-btn poetry__more-btn">
-                        <span>Читать</span>
-                        <img src="assets/img/more.svg" alt="" class="dev__more-btn-icon">
-                    </button>
+                    <div class="poetry__pipe-wrap" aria-hidden="true">
+                        <img src="assets/img/pipe.webp" alt="" class="poetry__pipe">
+                    </div>
+
+                    <div class="poetry__oil-stream" aria-hidden="true"></div>
+
+                    <div class="poetry__wheel-item">
+                        <img src="assets/img/wheel.webp" alt="" class="poetry__wheel-mesh" aria-hidden="true">
+                        
+                        <div class="gear-card poetry__card">
+                            <img src="assets/img/quill.svg" alt="" class="gear-card__icon">
+                            <h3 class="gear-card__title">Стихи и циклы</h3>
+                            <div class="gear-card__list">
+                                <p class="gear-card__desc">WoodenGear — 3 главы</p>
+                                <p class="gear-card__desc">Дождь</p>
+                                <p class="gear-card__desc">Свыше</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dev__actions poetry__actions">
+                        <button type="button" class="action-btn poetry__more-btn">
+                            <span>Читать</span>
+                            <img src="assets/img/more.svg" alt="" class="action-btn__icon">
+                        </button>
+                    </div>
                 </div>
 
                 <div class="oil-ocean__waves" aria-hidden="true">
                     <svg class="oil-wave oil-wave--back" viewBox="0 0 2400 120" preserveAspectRatio="none">
-                        <path d="M0,60 C300,10 600,100 900,45 C1200,-10 1500,95 1800,50 C2100,10 2400,80 2400,60 L2400,120 L0,120 Z"></path>
+                        <path d="M0,65 C200,25 400,25 600,65 C800,105 1000,105 1200,65 C1400,25 1600,25 1800,65 C2000,105 2200,105 2400,65 L2400,120 L0,120 Z"></path>
                     </svg>
                     <svg class="oil-wave oil-wave--front" viewBox="0 0 2400 120" preserveAspectRatio="none">
-                        <path d="M0,40 C350,90 650,10 950,70 C1250,110 1550,20 1850,65 C2150,100 2400,30 2400,40 L2400,120 L0,120 Z"></path>
+                        <path d="M0,70 C200,105 400,105 600,70 C800,35 1000,35 1200,70 C1400,105 1600,105 1800,70 C2000,35 2200,35 2400,70 L2400,120 L0,120 Z"></path>
                     </svg>
                 </div>
             </div>
@@ -142,7 +169,7 @@
             <h2 class="oil-ocean__title">Социальные сети</h2>
             <div class="oil-ocean__links">
                 <a href="https://t.me/WG_Programming" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
-                    <img src="assets/img/telegram.png" alt="" class="dev__more-btn-icon">
+                    <img src="assets/img/telegram.png" alt="Telegram" class="action-btn__icon">
                 </a>
             </div>
             <p class="oil-ocean__copy">® Wooden Gear</p>
