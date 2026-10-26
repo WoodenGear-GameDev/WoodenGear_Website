@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoodenGear — Разработка и проекты</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="index.html" class="logo" title="Вернуться на главную">
+            <div class="logo__gears" aria-hidden="true">
+                <img src="assets/img/gear_1.png" alt="" class="logo__gear logo__gear--big">
+                <img src="assets/img/gear_2.png" alt="" class="logo__gear logo__gear--small">
+            </div>
+            <img src="assets/img/wg_logo_text.png" alt="Wooden Gear" class="logo__text">
+        </a>
+    </header>
+
+    <main class="site-main">
+        <section class="projects-page">
+            <div class="section-title-wrap">
+                <h1 class="title">Разработка</h1>
+                <div class="projects-page__nav">
+                    <a href="index.html" class="action-btn projects-page__back-btn">
+                        <span>← На главную</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chain-viewport">
+                <div class="chain-canvas">
+                    <ul class="gear-chain">
+
+                        <li class="gear-chain__item gear-chain__item--left">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/MS_gameplay_prev.jpg">
+                                        <source src="assets/video/MS_gameplay.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Medieval Survival</h2>
+                                    <span class="project-badge">Unity • C#</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    3D-Survival с крафтами, строительством, готовкой, фермерством и сбором ресурсов, разработка которого началась во время изучения онлайн-курса по Unity.
+                                </p>
+                            </article>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--right">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/ToD_poster_bg.jpg">
+                                        <source src="assets/video/ToD_gameplay.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Treasure of Dragon</h2>
+                                    <span class="project-badge">Python</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    2D RPG-рогалик с видом сверху, написанный на Python в рамках проектной работы в университете.
+                                </p>
+                            </article>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--left">
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Remote Painting</h2>
+                                    <span class="project-badge">Avalonia UI • C#</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    Клиент-серверное приложение для совместного рисования по сети в реальном времени, написанное в рамках лабораторной работы в университете.
+                                </p>
+                            </article>
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/RP_vid.jpg">
+                                        <source src="assets/video/RP_vid.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--right">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <canvas id="paintCanvas" width="330" height="330" class="gear-media-fill gear-media-fill--paint"></canvas>
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <h3 class="profile-card__title">Инструменты холста</h3>
+                                <p class="profile-card__tagline">
+                                    Рисуй прямо внутри шестерёнки мышью или пальцем. Выбери цвет кисти, толщину линии или очисти полотно:
+                                </p>
+                                <div class="tool-panel">
+                                    <button type="button" class="color-dot active" data-color="#d97706" style="background:#d97706;" aria-label="Янтарный"></button>
+                                    <button type="button" class="color-dot" data-color="#e4e4e7" style="background:#e4e4e7;" aria-label="Белый"></button>
+                                    <button type="button" class="color-dot" data-color="#38bdf8" style="background:#38bdf8;" aria-label="Голубой"></button>
+                                    <button type="button" class="color-dot" data-color="#4ade80" style="background:#4ade80;" aria-label="Зелёный"></button>
+                                    <button type="button" class="color-dot" data-color="#ef4444" style="background:#ef4444;" aria-label="Красный"></button>
+                                    <button type="button" class="mini-btn" data-size="4">Тонкая</button>
+                                    <button type="button" class="mini-btn" data-size="9">Толстая</button>
+                                    <button type="button" class="mini-btn" id="clearPaintBtn">Очистить</button>
+                                </div>
+                            </article>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--left">
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Geometry Generator</h2>
+                                    <span class="project-badge">Unity • C#</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    Приложение для геометрических вычислений школьного уровня (треугольники, параллелограммы, трапеции) и размещения 2D-фигур в 3D-пространстве для создания чертежей.
+                                </p>
+                            </article>
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <img src="assets/img/GemGen.jpg" alt="Geometry Generator" class="gear-media-fill" onerror="this.style.display='none'">
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--right">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/PingPong.jpg">
+                                        <source src="assets/video/PingPong.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Arduino Ping Pong</h2>
+                                    <span class="project-badge">Arduino • C++</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    Игра на Arduino для двух человек: у каждого игрока свой джойстик, а ракетки и мяч выводятся на светодиодную матрицу 8×8.
+                                </p>
+                            </article>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--left">
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h3 class="profile-card__title">LED Matrix 8×8</h3>
+                                    <span class="project-badge" id="pongScoreBadge">Счёт: 0 : 0</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    Нажми «Подача» (или кликни по матрице), чтобы запустить мяч. Двигай левую платформу курсором или кнопками:
+                                </p>
+                                <div class="tool-panel">
+                                    <button type="button" class="mini-btn active" id="pongStartBtn">▶ Подача</button>
+                                    <button type="button" class="mini-btn" id="pongUp">▲ Вверх</button>
+                                    <button type="button" class="mini-btn" id="pongDown">▼ Вниз</button>
+                                    <button type="button" class="mini-btn" id="pongResetBtn">Сброс</button>
+                                </div>
+                            </article>
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <canvas id="ledPongCanvas" width="330" height="330" class="gear-media-fill" style="cursor: pointer;"></canvas>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--right">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <img src="assets/img/LEGO.jpg" alt="Lego Writer" class="gear-media-fill" onerror="this.style.display='none'">
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Lego Writer</h2>
+                                    <span class="project-badge">LEGO Mindstorms</span>
+                                </div>
+                                <p class="profile-card__tagline">
+                                    Печатная машинка из LEGO Mindstorms, работающая по принципу, схожим с работой 3D-принтера. Может писать все буквы русского алфавита.
+                                </p>
+                            </article>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="oil-ocean__waves" aria-hidden="true">
+                    <svg class="oil-wave oil-wave--back" viewBox="0 0 2400 120" preserveAspectRatio="none">
+                        <path d="M0,65 C200,25 400,25 600,65 C800,105 1000,105 1200,65 C1400,25 1600,25 1800,65 C2000,105 2200,105 2400,65 L2400,120 L0,120 Z"></path>
+                    </svg>
+                    <svg class="oil-wave oil-wave--front" viewBox="0 0 2400 120" preserveAspectRatio="none">
+                        <path d="M0,70 C200,105 400,105 600,70 C800,35 1000,35 1200,70 C1400,105 1600,105 1800,70 C2000,35 2200,35 2400,70 L2400,120 L0,120 Z"></path>
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="oil-ocean">
+        <div class="oil-ocean__content container">
+            <h2 class="oil-ocean__title">Социальные сети</h2>
+            <div class="oil-ocean__links">
+                <a href="https://t.me/WG_Programming" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
+                    <img src="assets/img/telegram.png" alt="Telegram" class="action-btn__icon">
+                </a>
+            </div>
+            <p class="oil-ocean__copy">® Wooden Gear</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
