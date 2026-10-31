@@ -215,7 +215,20 @@ body {
     white-space: nowrap;
 }
 
+.gear-card__desc__tiny-text {
+    font-size: 1.15rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
 .gear-card__desc::before {
+    content: "• ";
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+.gear-card__desc__tiny-text::before {
     content: "• ";
     color: var(--color-accent);
     font-weight: bold;
@@ -724,6 +737,26 @@ body {
     position: relative;
     width: 1300px;
     height: 3700px;
+    flex-shrink: 0;
+    transform: scale(var(--dev-scale));
+    transform-origin: top center;
+    padding-top: 30px;
+}
+
+.long-chain-viewport {
+    position: relative;
+    width: 100%;
+    height: calc(4600px * var(--dev-scale));
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
+.long-chain-canvas {
+    position: relative;
+    width: 1300px;
+    height: 4600px;
     flex-shrink: 0;
     transform: scale(var(--dev-scale));
     transform-origin: top center;

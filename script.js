@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const logoScale = Math.min(1, (vw - 24) / 780);
         const devScale = Math.min(1.1, (vw - 16) / 1340 * 1.1);
+        const penScale = Math.min(1.1, (vw - 16) / 1340 * 1.1);
         const poetryScale = Math.min(1, vw / 1600);
 
         root.style.setProperty('--logo-scale', logoScale.toFixed(4));
