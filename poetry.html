@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoodenGear — Поэзия и сборники</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="index.html" class="logo" title="Вернуться на главную">
+            <div class="logo__gears" aria-hidden="true">
+                <img src="assets/img/gear_1.png" alt="" class="logo__gear logo__gear--big">
+                <img src="assets/img/gear_2.png" alt="" class="logo__gear logo__gear--small">
+            </div>
+            <img src="assets/img/wg_logo_text.png" alt="Wooden Gear" class="logo__text">
+        </a>
+    </header>
+
+    <main class="site-main">
+        <section class="poetry-reader">
+            <div class="section-title-wrap">
+                <h1 class="title">Поэзия</h1>
+                <div class="projects-page__nav">
+                    <a href="index.html" class="action-btn projects-page__back-btn">
+                        <span>← На главную</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="reader-viewport">
+                <div class="reader-canvas">
+
+                    <aside class="profile-card reader-toc">
+                        <div class="reader-toc__modes">
+                            <img src="assets/img/gear_2.png" alt="" class="reader-toc__mode-gear" id="tocModeGear" aria-hidden="true">
+                            <button type="button" class="mini-btn active" data-poetry-mode="collections">Сборники</button>
+                            <button type="button" class="mini-btn" data-poetry-mode="singles">Отдельные стихи</button>
+                        </div>
+
+                        <div class="reader-toc__shelf" id="bookShelf">
+                            <div class="reader-toc__shelf-header">
+                                <span class="reader-toc__shelf-label">Выбор сборника:</span>
+                                <div class="reader-toc__shelf-arrows">
+                                    <button type="button" class="mini-btn reader-toc__arrow" id="prevBookBtn" title="Предыдущий сборник">◀</button>
+                                    <button type="button" class="mini-btn reader-toc__arrow" id="nextBookBtn" title="Следующий сборник">▶</button>
+                                </div>
+                            </div>
+                            <div class="reader-toc__books" id="bookSelectorWrap"></div>
+                        </div>
+
+                        <h2 class="profile-card__title reader-toc__heading" id="tocTitle">Оглавление</h2>
+
+                        <ul class="reader-toc__list" id="tocList"></ul>
+
+                        <p class="reader-toc__hint">
+                            Крути колёсико мыши над шестернёй справа или нажимай на зубья, чтобы листать страницы.
+                        </p>
+                    </aside>
+
+                    <div class="reader-stage">
+                        <div class="reader-sheet" id="poemSheet">
+                            <img src="" alt="Страница стихотворения" class="reader-sheet__img" id="poemPageImg">
+
+                            <div class="reader-sheet__placeholder" id="poemPlaceholder">
+                                <span class="project-badge" id="placeholderBadge">Сборник</span>
+                                <h3 id="placeholderTitle">Название главы</h3>
+                                <p id="placeholderPath">Файл листа: assets/img/poems/...</p>
+                                <span class="reader-sheet__page-num" id="placeholderPage">Стр. 1</span>
+                            </div>
+                        </div>
+
+                        <div class="reader-controls">
+                            <button type="button" class="mini-btn" id="prevPageBtn">◀ Пред. лист</button>
+                            <span class="project-badge" id="pageIndicator">Стр. 1 из 1</span>
+                            <button type="button" class="mini-btn" id="nextPageBtn">След. лист ▶</button>
+                        </div>
+                    </div>
+
+                    <div class="reader-pointer" aria-hidden="true">
+                        <div class="reader-pointer__fallback"></div>
+                    </div>
+
+                    <div class="reader-flywheel-mask">
+                        <div class="reader-flywheel" id="flywheelArea" title="Прокрутите колесо мыши для смены страницы">
+                            <img src="assets/img/giant_gear.webp" alt="" class="reader-flywheel__gear" id="flywheelGear" onerror="this.src='assets/img/gear_3.webp'">
+                            <div class="reader-flywheel__numbers" id="flywheelNumbers"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="oil-ocean__waves" aria-hidden="true">
+                    <svg class="oil-wave oil-wave--back" viewBox="0 0 2400 120" preserveAspectRatio="none">
+                        <path d="M0,65 C200,25 400,25 600,65 C800,105 1000,105 1200,65 C1400,25 1600,25 1800,65 C2000,105 2200,105 2400,65 L2400,120 L0,120 Z"></path>
+                    </svg>
+                    <svg class="oil-wave oil-wave--front" viewBox="0 0 2400 120" preserveAspectRatio="none">
+                        <path d="M0,70 C200,105 400,105 600,70 C800,35 1000,35 1200,70 C1400,105 1600,105 1800,70 C2000,35 2200,35 2400,70 L2400,120 L0,120 Z"></path>
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="oil-ocean">
+        <div class="oil-ocean__content container">
+            <h2 class="oil-ocean__title">Социальные сети</h2>
+            <div class="oil-ocean__links">
+                <a href="https://t.me/WG_Programming" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
+                    <img src="assets/img/telegram.png" alt="Telegram" class="action-btn__icon">
+                </a>
+            </div>
+            <p class="oil-ocean__copy">® Wooden Gear</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
