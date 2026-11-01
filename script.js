@@ -1,17 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     const header = document.querySelector('.site-header');
+    const gearChain = document.querySelector('.gear-chain');
+
+    let gearTargetSpeed = 0.2;
+
+    function isMobileLayout() {
+        return window.innerWidth <= 820;
+    }
 
     function updateResponsiveScale() {
         const vw = window.innerWidth;
+        const mobile = isMobileLayout();
 
         const logoScale = Math.min(1, (vw - 24) / 780);
         const devScale = Math.min(1, (vw - 16) / 1340);
         const poetryScale = Math.min(1, vw / 1600);
 
+        const devHomeScale = mobile ? Math.min(1, (vw - 12) / 640) : devScale;
+        const poetryHomeScale = mobile ? Math.min(1, vw / 760) : poetryScale;
+        const chainScale = mobile ? Math.min(1, (vw - 8) / 920) : devScale;
+
         root.style.setProperty('--logo-scale', logoScale.toFixed(4));
         root.style.setProperty('--dev-scale', devScale.toFixed(4));
         root.style.setProperty('--poetry-scale', poetryScale.toFixed(4));
+        root.style.setProperty('--dev-home-scale', devHomeScale.toFixed(4));
+        root.style.setProperty('--poetry-home-scale', poetryHomeScale.toFixed(4));
+        root.style.setProperty('--chain-scale', chainScale.toFixed(4));
+
+        if (gearChain) {
+            const itemsCount = gearChain.querySelectorAll('.gear-chain__item').length;
+            if (itemsCount > 0) {
+                const stepY = mobile ? 488 : 423;
+                const baseHeight = 30 + 600 + (itemsCount - 1) * stepY + 130;
+                root.style.setProperty('--chain-base-height', `${baseHeight}px`);
+            }
+        }
 
         if (header) {
             header.style.height = `${Math.round(345 * logoScale + 48)}px`;
@@ -21,150 +45,84 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', updateResponsiveScale);
     updateResponsiveScale();
 
-    const cluster = document.querySelector('.content__gear-cluster');
-    const gearChain = document.querySelector('.gear-chain');
-    const devMoreBtn = document.querySelector('.dev__more-btn');
+    function initKineticLoop() {
+        const cluster = document.querySelector('.content__gear-cluster');
+        const devMoreBtn = document.querySelector('.dev__more-btn');
+        const wheelMesh = document.querySelector('.poetry__wheel-mesh');
+        const oilStream = document.querySelector('.poetry__oil-stream');
+        const poetryBtn = document.querySelector('.poetry__more-btn');
 
-    let gearAngle = 0;
-    let gearSpeed = 0.2;
-    let gearTargetSpeed = 0.2;
+        let gearAngle = 0;
+        let gearSpeed = 0.2;
 
-    if (devMoreBtn) {
-        devMoreBtn.addEventListener('mouseenter', () => { gearTargetSpeed = 1; });
-        devMoreBtn.addEventListener('mouseleave', () => { gearTargetSpeed = 0.2; });
-    }
+        let wheelAngle = 0;
+        let wheelSpeed = 0.18;
+        let wheelTargetSpeed = 0.18;
 
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (gearChain) {
-            gearTargetSpeed = 0.85;
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { gearTargetSpeed = 0.2; }, 180);
-        }
-    }, { passive: true });
+        let oilPos = 0;
+        let oilSpeed = 1.2;
+        let oilTargetSpeed = 1.2;
+        const viscosity = 0.015;
 
-    const wheelMesh = document.querySelector('.poetry__wheel-mesh');
-    const oilStream = document.querySelector('.poetry__oil-stream');
-    const poetryBtn = document.querySelector('.poetry__more-btn');
-
-    let wheelAngle = 0;
-    let wheelSpeed = 0.18;
-    let wheelTargetSpeed = 0.18;
-    let oilPos = 0;
-    let oilSpeed = 1.2;
-    let oilTargetSpeed = 1.2;
-    const viscosity = 0.015;
-
-    if (poetryBtn) {
-        poetryBtn.addEventListener('mouseenter', () => {
-            wheelTargetSpeed = 0.6;
-            oilTargetSpeed = 3.6;
-        });
-        poetryBtn.addEventListener('mouseleave', () => {
-            wheelTargetSpeed = 0.18;
-            oilTargetSpeed = 1.2;
-        });
-    }
-
-    function loop() {
-        gearSpeed += (gearTargetSpeed - gearSpeed) * 0.05;
-        gearAngle = (gearAngle + gearSpeed) % 360;
-
-        if (cluster) cluster.style.setProperty('--gear-deg', `${gearAngle}deg`);
-        if (gearChain) gearChain.style.setProperty('--gear-deg', `${gearAngle}deg`);
-
-        if (wheelMesh) {
-            wheelSpeed += (wheelTargetSpeed - wheelSpeed) * viscosity;
-            wheelAngle = (wheelAngle + wheelSpeed) % 360;
-            wheelMesh.style.setProperty('--wheel-deg', `${wheelAngle}deg`);
+        if (devMoreBtn) {
+            devMoreBtn.addEventListener('mouseenter', () => { gearTargetSpeed = 1; });
+            devMoreBtn.addEventListener('mouseleave', () => { gearTargetSpeed = 0.2; });
         }
 
-        if (oilStream) {
-            oilSpeed += (oilTargetSpeed - oilSpeed) * viscosity;
-            oilPos = (oilPos + oilSpeed) % 280;
-            oilStream.style.setProperty('--oil-pos', `${oilPos}px`);
-        }
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (gearChain || cluster) {
+                gearTargetSpeed = 0.85;
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => { gearTargetSpeed = 0.2; }, 180);
+            }
+        }, { passive: true });
 
-        requestAnimationFrame(loop);
-    }
-    loop();
-
-    const heroCanvas = document.getElementById('heroCanvas');
-    if (heroCanvas) {
-        const ctx = heroCanvas.getContext('2d');
-        let action = 'idle';
-        let tick = 0;
-
-        document.querySelectorAll('[data-hero-action]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-hero-action]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                action = btn.dataset.heroAction;
+        if (poetryBtn) {
+            poetryBtn.addEventListener('mouseenter', () => {
+                wheelTargetSpeed = 0.6;
+                oilTargetSpeed = 3.6;
             });
-        });
+            poetryBtn.addEventListener('mouseleave', () => {
+                wheelTargetSpeed = 0.18;
+                oilTargetSpeed = 1.2;
+            });
+        }
 
-        function drawHero() {
-            tick += 0.08;
-            ctx.fillStyle = '#121318';
-            ctx.fillRect(0, 0, 330, 330);
+        function step() {
+            gearSpeed += (gearTargetSpeed - gearSpeed) * 0.05;
+            gearAngle = (gearAngle + gearSpeed) % 360;
 
-            ctx.fillStyle = '#1c1917';
-            ctx.fillRect(0, 235, 330, 95);
-            ctx.fillStyle = '#3f6212';
-            ctx.fillRect(0, 228, 330, 8);
+            if (cluster) cluster.style.setProperty('--gear-deg', `${gearAngle}deg`);
+            if (gearChain) gearChain.style.setProperty('--gear-deg', `${gearAngle}deg`);
 
-            const bob = Math.sin(tick * 2) * 4;
-            const hx = 130, hy = 145 + bob;
-
-            if (action === 'chop') {
-                const shake = Math.sin(tick * 6) > 0.7 ? 3 : 0;
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(210 + shake, 120, 22, 110);
-                ctx.fillStyle = '#15803d';
-                ctx.beginPath();
-                ctx.arc(221 + shake, 105, 42, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (action === 'cook') {
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(195, 215, 46, 12);
-                ctx.fillStyle = '#f59e0b';
-                ctx.beginPath();
-                ctx.arc(218, 204 + Math.sin(tick * 5) * 4, 18, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(218, 198, 9, 0, Math.PI * 2);
-                ctx.fill();
+            if (wheelMesh) {
+                wheelSpeed += (wheelTargetSpeed - wheelSpeed) * viscosity;
+                wheelAngle = (wheelAngle + wheelSpeed) % 360;
+                wheelMesh.style.setProperty('--wheel-deg', `${wheelAngle}deg`);
             }
 
-            ctx.fillStyle = '#52525b';
-            ctx.fillRect(hx - 14, 195, 11, 35);
-            ctx.fillRect(hx + 5, 195, 11, 35);
-            ctx.fillStyle = '#92400e';
-            ctx.fillRect(hx - 20, hy + 10, 42, 46);
-            ctx.fillStyle = '#fde68a';
-            ctx.fillRect(hx - 15, hy - 20, 32, 30);
-            ctx.fillStyle = '#a1a1aa';
-            ctx.fillRect(hx - 18, hy - 26, 38, 12);
+            if (oilStream) {
+                oilSpeed += (oilTargetSpeed - oilSpeed) * viscosity;
+                oilPos = (oilPos + oilSpeed) % 280;
+                oilStream.style.setProperty('--oil-pos', `${oilPos}px`);
+            }
 
-            ctx.save();
-            ctx.translate(hx + 16, hy + 22);
-            const swing = action === 'chop' ? Math.sin(tick * 6) * 0.95 : Math.sin(tick) * 0.15;
-            ctx.rotate(swing);
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(0, -5, 34, 8);
-            ctx.fillStyle = '#e4e4e7';
-            ctx.fillRect(26, -16, 11, 22);
-            ctx.restore();
-
-            requestAnimationFrame(drawHero);
+            requestAnimationFrame(step);
         }
-        drawHero();
+
+        step();
     }
 
-    const paintCanvas = document.getElementById('paintCanvas');
-    if (paintCanvas) {
+    function initPaintCanvas() {
+        const paintCanvas = document.getElementById('paintCanvas');
+        if (!paintCanvas) return;
+
         const ctx = paintCanvas.getContext('2d');
+        const colorDots = document.querySelectorAll('.color-dot');
+        const sizeButtons = document.querySelectorAll('[data-size]');
+        const clearBtn = document.getElementById('clearPaintBtn');
+
         let drawing = false;
         let brushColor = '#d97706';
         let brushSize = 4;
@@ -200,21 +158,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('pointerup', () => { drawing = false; });
 
-        document.querySelectorAll('.color-dot').forEach(dot => {
+        colorDots.forEach(dot => {
             dot.addEventListener('click', () => {
-                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                colorDots.forEach(d => d.classList.remove('active'));
                 dot.classList.add('active');
                 brushColor = dot.dataset.color;
             });
         });
 
-        document.querySelectorAll('[data-size]').forEach(btn => {
+        sizeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
                 brushSize = Number(btn.dataset.size);
             });
         });
 
-        const clearBtn = document.getElementById('clearPaintBtn');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
                 ctx.fillStyle = '#121215';
@@ -223,8 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const ledCanvas = document.getElementById('ledPongCanvas');
-    if (ledCanvas) {
+    function initLedPong() {
+        const ledCanvas = document.getElementById('ledPongCanvas');
+        if (!ledCanvas) return;
+
         const ctx = ledCanvas.getContext('2d');
         const pongScoreBadge = document.getElementById('pongScoreBadge');
         const startBtn = document.getElementById('pongStartBtn');
@@ -232,19 +193,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const pongUp = document.getElementById('pongUp');
         const pongDown = document.getElementById('pongDown');
 
-        const COLS = 8, ROWS = 8;
+        const COLS = 8;
+        const ROWS = 8;
         const PADDLE_H = 3;
+        const BOARD_OFFSET = 57;
+        const CELL_STEP = 27;
 
         let p1Y = 2;
         let p2Y = 2;
         let ball = { x: 3.5, y: 3.5, vx: 0.065, vy: 0.045 };
-        let s1 = 0, s2 = 0;
-
+        let s1 = 0;
+        let s2 = 0;
         let isRunning = false;
         let blinkTick = 0;
-
-        const boardOffset = 57;
-        const cellStep = 27;
 
         function resetBall(dir = 1) {
             ball.x = 3.5;
@@ -266,9 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                setRunningState(!isRunning);
-            });
+            startBtn.addEventListener('click', () => setRunningState(!isRunning));
         }
 
         ledCanvas.addEventListener('click', () => {
@@ -290,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ledCanvas.addEventListener('pointermove', e => {
             const rect = ledCanvas.getBoundingClientRect();
             const canvasY = (e.clientY - rect.top) * (ledCanvas.height / rect.height);
-            const row = Math.floor((canvasY - boardOffset) / cellStep) - 1;
+            const row = Math.floor((canvasY - BOARD_OFFSET) / CELL_STEP) - 1;
             p1Y = Math.max(0, Math.min(ROWS - PADDLE_H, row));
         });
 
@@ -304,13 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 ball.x += ball.vx;
                 ball.y += ball.vy;
 
-                if (ball.y <= 0) { 
-                    ball.y = 0; 
-                    ball.vy = Math.abs(ball.vy) + (Math.random() * 0.008); 
+                if (ball.y <= 0) {
+                    ball.y = 0;
+                    ball.vy = Math.abs(ball.vy) + (Math.random() * 0.008);
                 }
-                if (ball.y >= ROWS - 1) { 
-                    ball.y = ROWS - 1; 
-                    ball.vy = -Math.abs(ball.vy) - (Math.random() * 0.008); 
+                if (ball.y >= ROWS - 1) {
+                    ball.y = ROWS - 1;
+                    ball.vy = -Math.abs(ball.vy) - (Math.random() * 0.008);
                 }
 
                 const targetY = ball.y - 1 + (Math.sin(blinkTick * 1.5) * 0.35);
@@ -353,14 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = '#111318';
             ctx.strokeStyle = '#27272a';
             ctx.lineWidth = 2;
-            ctx.strokeRect(boardOffset - 6, boardOffset - 6, COLS * cellStep + 12, ROWS * cellStep + 12);
-            ctx.fillRect(boardOffset - 6, boardOffset - 6, COLS * cellStep + 12, ROWS * cellStep + 12);
+            ctx.strokeRect(BOARD_OFFSET - 6, BOARD_OFFSET - 6, COLS * CELL_STEP + 12, ROWS * CELL_STEP + 12);
+            ctx.fillRect(BOARD_OFFSET - 6, BOARD_OFFSET - 6, COLS * CELL_STEP + 12, ROWS * CELL_STEP + 12);
 
             const bx = Math.round(ball.x);
             const by = Math.round(ball.y);
             const p1 = Math.round(p1Y);
             const p2 = Math.round(p2Y);
-
             const ballVisible = isRunning || Math.sin(blinkTick * 2.5) > -0.3;
 
             for (let r = 0; r < ROWS; r++) {
@@ -369,8 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isRightPaddle = (c === COLS - 1 && r >= p2 && r < p2 + PADDLE_H);
                     const isBall = (c === bx && r === by) && ballVisible;
 
-                    const cx = boardOffset + c * cellStep + cellStep / 2;
-                    const cy = boardOffset + r * cellStep + cellStep / 2;
+                    const cx = BOARD_OFFSET + c * CELL_STEP + CELL_STEP / 2;
+                    const cy = BOARD_OFFSET + r * CELL_STEP + CELL_STEP / 2;
 
                     ctx.beginPath();
                     ctx.arc(cx, cy, 9.5, 0, Math.PI * 2);
@@ -390,14 +348,513 @@ document.addEventListener('DOMContentLoaded', () => {
 
             requestAnimationFrame(drawLedPong);
         }
+
         drawLedPong();
     }
 
-    const flywheelGear = document.getElementById('flywheelGear');
-    const flywheelNumbers = document.getElementById('flywheelNumbers');
-    const tocList = document.getElementById('tocList');
+    function initGearPuzzle() {
+        const puzzleCanvas = document.getElementById('gearPuzzleCanvas');
+        if (!puzzleCanvas) return;
 
-    if (flywheelGear && flywheelNumbers && tocList) {
+        const ctx = puzzleCanvas.getContext('2d');
+        const statusBadge = document.getElementById('puzzleStatusBadge');
+        const taskText = document.getElementById('puzzleTaskText');
+        const resetPuzzleBtn = document.getElementById('puzzleResetBtn');
+        const sizeButtons = document.querySelectorAll('[data-gear-size]');
+        const levelButtons = document.querySelectorAll('[data-puzzle-level]');
+
+        const CENTER = 165;
+        const GEAR_SPECS = {
+            S: { radius: 24, teeth: 8,  label: 'Малая' },
+            M: { radius: 36, teeth: 12, label: 'Средняя' },
+            L: { radius: 48, teeth: 16, label: 'Большая' }
+        };
+
+        const PUZZLE_LEVELS = [
+            {
+                hint: 'Уровень 1 (Инверсия): Запусти правый вал ПРОТИВ часовой стрелки. Ось в самом центре — ловушка (даёт неверное направление вращения)!',
+                inventory: { S: 0, M: 2, L: 1 },
+                nodes: [
+                    { id: 'drv', x: -84, y:   0, type: 'driver', size: 'M', dir: 1 },
+                    { id: 'trg', x:  84, y:   0, type: 'target', size: 'M', targetDir: -1 },
+                    { id: 'p1',  x:   0, y:   0, type: 'pin',    size: null },
+                    { id: 'p2',  x: -36, y: -54, type: 'pin',    size: null },
+                    { id: 'p3',  x:  36, y: -54, type: 'pin',    size: null }
+                ]
+            },
+            {
+                hint: 'Уровень 2 (Двойной контур): Запитай сразу два ведомых вала справа — верхний должен вращаться ПРОТИВ часовой стрелки, а нижний — ПО часовой.',
+                inventory: { S: 2, M: 2, L: 0 },
+                nodes: [
+                    { id: 'drv',  x: -92, y: -12, type: 'driver', size: 'S', dir: 1 },
+                    { id: 'p1',   x: -32, y: -12, type: 'pin',    size: null },
+                    { id: 'p2',   x:  16, y: -48, type: 'pin',    size: null },
+                    { id: 'trgA', x:  64, y: -48, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'p3',   x: -32, y:  60, type: 'pin',    size: null },
+                    { id: 'p4',   x:  28, y:  60, type: 'pin',    size: null },
+                    { id: 'trgB', x:  76, y:  24, type: 'target', size: 'M', targetDir: 1 }
+                ]
+            },
+            {
+                hint: 'Уровень 3 (Обход клина): В центре закреплена стальная паразитная шестерня. Запитай оба вала справа, избегая оси-ловушки слева вверху (она заклинит привод)!',
+                inventory: { S: 3, M: 0, L: 0 },
+                nodes: [
+                    { id: 'drv',   x: -90, y:   0, type: 'driver', size: 'M', dir: 1 },
+                    { id: 'fixed', x: -18, y:   0, type: 'fixed',  size: 'M' },
+                    { id: 'trap',  x: -54, y: -48, type: 'pin',    size: null },
+                    { id: 'pUp',   x:  18, y: -48, type: 'pin',    size: null },
+                    { id: 'trgA',  x:  66, y: -48, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'pLow1', x: -18, y:  60, type: 'pin',    size: null },
+                    { id: 'pLow2', x:  30, y:  60, type: 'pin',    size: null },
+                    { id: 'trgB',  x:  78, y:  24, type: 'target', size: 'M', targetDir: 1 }
+                ]
+            },
+            {
+                hint: 'Уровень 4 (Тройной распределитель): Установи центральный маховик так, чтобы одновременно раздать крутящий момент на все ТРИ ведомых вала по краям платы!',
+                inventory: { S: 2, M: 1, L: 1 },
+                nodes: [
+                    { id: 'drv',    x: -90, y:   0, type: 'driver', size: 'S', dir: 1 },
+                    { id: 'pHub',   x: -18, y:   0, type: 'pin',    size: null },
+                    { id: 'pUp',    x: -18, y: -72, type: 'pin',    size: null },
+                    { id: 'trgA',   x:  30, y: -72, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'pRight', x:  54, y:   0, type: 'pin',    size: null },
+                    { id: 'trgB',   x:  90, y:  48, type: 'target', size: 'M', targetDir: -1 },
+                    { id: 'pLow',   x: -18, y:  84, type: 'pin',    size: null },
+                    { id: 'trgC',   x: -78, y:  84, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'pDecoy', x: -54, y: -48, type: 'pin',    size: null }
+                ]
+            },
+            {
+                hint: 'Уровень 5 (Повышающая передача 2x): Правый вал с меткой «2x» требует двойной скорости вращения! Прямой мост от малого верхнего мотора даст лишь 1x — подай привод от большого нижнего маховика (16 зубьев).',
+                inventory: { S: 2, M: 2, L: 0 },
+                nodes: [
+                    { id: 'drv1x',   x: -72, y: -48, type: 'driver', size: 'S', dir: 1 },
+                    { id: 'drv2x',   x: -72, y:  48, type: 'driver', size: 'L', dir: 1 },
+                    { id: 'pTop',    x: -36, y: -96, type: 'pin',    size: null },
+                    { id: 'trgB',    x:  24, y: -96, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'pTrap1',  x: -24, y: -48, type: 'pin',    size: null },
+                    { id: 'pTrap2',  x:  24, y: -48, type: 'pin',    size: null },
+                    { id: 'pLow1',   x:   0, y:  48, type: 'pin',    size: null },
+                    { id: 'pBridge', x:  36, y:   0, type: 'pin',    size: null },
+                    { id: 'trgA',    x:  72, y: -48, type: 'target', size: 'S', targetDir: -1, minSpeed: 1.9 }
+                ]
+            },
+            {
+                hint: 'Уровень 6 (Часовой лабиринт): Финальное испытание! От центрального мотора и паразитной шестерни запитай все 3 замка, использовав каждую деталь со склада и не угодив в треугольник клина.',
+                inventory: { S: 2, M: 1, L: 1 },
+                nodes: [
+                    { id: 'drv',    x:   0, y:   0, type: 'driver', size: 'S', dir: 1 },
+                    { id: 'fixed1', x: -48, y:   0, type: 'fixed',  size: 'S' },
+                    { id: 'p1',     x: -48, y: -60, type: 'pin',    size: null },
+                    { id: 'p2',     x:  12, y: -60, type: 'pin',    size: null },
+                    { id: 'trgA',   x:  60, y: -60, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'p3',     x: -48, y:  72, type: 'pin',    size: null },
+                    { id: 'trgB',   x:  24, y:  72, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'p4',     x:  48, y:   0, type: 'pin',    size: null },
+                    { id: 'trgC',   x:  96, y:   0, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'pTrap',  x: -24, y:  41, type: 'pin',    size: null },
+                    { id: 'pDecoy', x:  60, y:  40, type: 'pin',    size: null }
+                ]
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let selectedSize = 'M';
+        let nodes = [];
+        let remainingStock = { S: 0, M: 0, L: 0 };
+        let isJammed = false;
+        let isSolved = false;
+        let errorFlashNode = null;
+        let errorFlashTimer = 0;
+
+        function updateInventoryUI() {
+            const lvlInv = PUZZLE_LEVELS[currentLevelIdx].inventory;
+            const used = { S: 0, M: 0, L: 0 };
+            nodes.forEach(n => {
+                if (n.type === 'pin' && n.size) used[n.size]++;
+            });
+
+            ['S', 'M', 'L'].forEach(sz => {
+                remainingStock[sz] = Math.max(0, lvlInv[sz] - used[sz]);
+            });
+
+            sizeButtons.forEach(btn => {
+                const sz = btn.dataset.gearSize;
+                const count = remainingStock[sz];
+                btn.textContent = `⚙ ${GEAR_SPECS[sz].label} [${count}]`;
+                btn.style.opacity = count === 0 ? '0.45' : '1';
+            });
+
+            if (remainingStock[selectedSize] === 0) {
+                const available = ['S', 'M', 'L'].find(sz => remainingStock[sz] > 0);
+                if (available) {
+                    selectedSize = available;
+                    sizeButtons.forEach(b => b.classList.toggle('active', b.dataset.gearSize === selectedSize));
+                }
+            }
+        }
+
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            const lvl = PUZZLE_LEVELS[idx];
+            nodes = lvl.nodes.map(n => ({
+                ...n,
+                cx: CENTER + n.x,
+                cy: CENTER + n.y,
+                angle: 0,
+                speed: 0,
+                jammed: false
+            }));
+            if (taskText) taskText.textContent = lvl.hint;
+            levelButtons.forEach((b, i) => b.classList.toggle('active', i === idx));
+            updateInventoryUI();
+            recalculateKinematics();
+        }
+
+        function isTargetSatisfied(t) {
+            if (isJammed || t.speed === 0) return false;
+            if (Math.sign(t.speed) !== t.targetDir) return false;
+            if (t.minSpeed && Math.abs(t.speed) < t.minSpeed) return false;
+            return true;
+        }
+
+        function recalculateKinematics() {
+            isJammed = false;
+            isSolved = false;
+
+            nodes.forEach(n => {
+                n.speed = 0;
+                n.jammed = false;
+            });
+
+            const activeNodes = nodes.filter(n => n.size !== null);
+            const queue = [];
+
+            activeNodes.forEach(n => {
+                if (n.type === 'driver') {
+                    n.speed = n.dir * 1.0;
+                    queue.push(n);
+                }
+            });
+
+            while (queue.length > 0) {
+                const curr = queue.shift();
+                const r1 = GEAR_SPECS[curr.size].radius;
+                const z1 = GEAR_SPECS[curr.size].teeth;
+
+                for (const next of activeNodes) {
+                    if (next === curr) continue;
+                    const r2 = GEAR_SPECS[next.size].radius;
+                    const z2 = GEAR_SPECS[next.size].teeth;
+                    const dist = Math.hypot(curr.cx - next.cx, curr.cy - next.cy);
+
+                    if (Math.abs(dist - (r1 + r2)) <= 2.5) {
+                        const expectedSpeed = -curr.speed * (z1 / z2);
+
+                        if (next.speed === 0) {
+                            next.speed = expectedSpeed;
+                            queue.push(next);
+                        } else if (Math.abs(next.speed - expectedSpeed) > 0.05) {
+                            isJammed = true;
+                            curr.jammed = true;
+                            next.jammed = true;
+                        }
+                    }
+                }
+            }
+
+            if (isJammed) {
+                activeNodes.forEach(n => {
+                    if (n.speed !== 0) n.jammed = true;
+                    n.speed = 0;
+                });
+            }
+
+            const targets = nodes.filter(n => n.type === 'target');
+            isSolved = !isJammed && targets.every(isTargetSatisfied);
+
+            if (statusBadge) {
+                if (isJammed) {
+                    statusBadge.textContent = '⚠ Клин привода!';
+                    statusBadge.style.borderColor = '#ef4444';
+                    statusBadge.style.background = 'rgba(239, 68, 68, 0.22)';
+                } else if (isSolved) {
+                    statusBadge.textContent = `✓ Ур. ${currentLevelIdx + 1} решён!`;
+                    statusBadge.style.borderColor = '#4ade80';
+                    statusBadge.style.background = 'rgba(74, 222, 128, 0.22)';
+                    gearTargetSpeed = 0.9;
+                    setTimeout(() => { gearTargetSpeed = 0.2; }, 1600);
+                } else {
+                    const wrongDir = targets.some(t => t.speed !== 0 && Math.sign(t.speed) !== t.targetDir);
+                    const tooSlow = targets.some(t => t.speed !== 0 && Math.sign(t.speed) === t.targetDir && t.minSpeed && Math.abs(t.speed) < t.minSpeed);
+
+                    if (wrongDir) {
+                        statusBadge.textContent = '↺ Не та сторона!';
+                    } else if (tooSlow) {
+                        statusBadge.textContent = '⚡ Медленно (нужно 2x)!';
+                    } else {
+                        statusBadge.textContent = `Уровень ${currentLevelIdx + 1} / ${PUZZLE_LEVELS.length}`;
+                    }
+                    statusBadge.style.borderColor = 'var(--color-accent)';
+                    statusBadge.style.background = 'rgba(217, 119, 6, 0.15)';
+                }
+            }
+        }
+
+        puzzleCanvas.addEventListener('pointerdown', e => {
+            const rect = puzzleCanvas.getBoundingClientRect();
+            const mx = (e.clientX - rect.left) * (puzzleCanvas.width / rect.width);
+            const my = (e.clientY - rect.top) * (puzzleCanvas.height / rect.height);
+
+            for (const node of nodes) {
+                if (node.type !== 'pin') continue;
+                const hitR = node.size ? GEAR_SPECS[node.size].radius : 22;
+
+                if (Math.hypot(mx - node.cx, my - node.cy) <= hitR) {
+                    if (node.size !== null) {
+                        const removedSize = node.size;
+                        node.size = null;
+                        selectedSize = removedSize;
+                        sizeButtons.forEach(b => b.classList.toggle('active', b.dataset.gearSize === selectedSize));
+                        updateInventoryUI();
+                        recalculateKinematics();
+                        return;
+                    }
+
+                    if (remainingStock[selectedSize] <= 0) {
+                        errorFlashNode = node;
+                        errorFlashTimer = 20;
+                        return;
+                    }
+
+                    const candR = GEAR_SPECS[selectedSize].radius;
+                    let overlaps = false;
+                    for (const other of nodes) {
+                        if (other === node || other.size === null) continue;
+                        const otherR = GEAR_SPECS[other.size].radius;
+                        const dist = Math.hypot(node.cx - other.cx, node.cy - other.cy);
+                        if (dist < (candR + otherR) - 2.5) {
+                            overlaps = true;
+                            break;
+                        }
+                    }
+
+                    if (overlaps) {
+                        errorFlashNode = node;
+                        errorFlashTimer = 25;
+                    } else {
+                        node.size = selectedSize;
+                        updateInventoryUI();
+                        recalculateKinematics();
+                    }
+                    return;
+                }
+            }
+        });
+
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = btn.dataset.gearSize;
+            });
+        });
+
+        levelButtons.forEach(btn => {
+            btn.addEventListener('click', () => loadLevel(Number(btn.dataset.puzzleLevel)));
+        });
+
+        if (resetPuzzleBtn) {
+            resetPuzzleBtn.addEventListener('click', () => loadLevel(currentLevelIdx));
+        }
+
+        function drawGearShape(x, y, radius, teeth, angle, palette) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            const outerR = radius + 4.5;
+            const innerR = radius - 4.5;
+            const step = (Math.PI * 2) / teeth;
+
+            ctx.beginPath();
+            for (let i = 0; i < teeth; i++) {
+                const a0 = i * step;
+                const a1 = a0 + step * 0.18;
+                const a2 = a0 + step * 0.45;
+                const a3 = a0 + step * 0.63;
+                const a4 = a0 + step;
+
+                ctx.lineTo(Math.cos(a0) * innerR, Math.sin(a0) * innerR);
+                ctx.lineTo(Math.cos(a1) * outerR, Math.sin(a1) * outerR);
+                ctx.lineTo(Math.cos(a2) * outerR, Math.sin(a2) * outerR);
+                ctx.lineTo(Math.cos(a3) * innerR, Math.sin(a3) * innerR);
+                ctx.lineTo(Math.cos(a4) * innerR, Math.sin(a4) * innerR);
+            }
+            ctx.closePath();
+
+            ctx.fillStyle = palette.fill;
+            ctx.strokeStyle = palette.stroke;
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.58, 0, Math.PI * 2);
+            ctx.fillStyle = '#121216';
+            ctx.fill();
+            ctx.stroke();
+
+            for (let s = 0; s < 4; s++) {
+                const sa = s * (Math.PI / 2);
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(sa) * 7, Math.sin(sa) * 7);
+                ctx.lineTo(Math.cos(sa) * (radius * 0.58), Math.sin(sa) * (radius * 0.58));
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = palette.stroke;
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+            ctx.fillStyle = palette.hub;
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#09090b';
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawDirectionArrow(x, y, dir, color, isTurbo = false) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.2;
+
+            const r = 13.5;
+            ctx.beginPath();
+            if (dir > 0) {
+                ctx.arc(0, 0, r, -Math.PI * 0.75, Math.PI * 0.25, false);
+            } else {
+                ctx.arc(0, 0, r, -Math.PI * 0.25, Math.PI * 0.75, true);
+            }
+            ctx.stroke();
+
+            const tipAngle = dir > 0 ? Math.PI * 0.25 : Math.PI * 0.75;
+            const tx = Math.cos(tipAngle) * r;
+            const ty = Math.sin(tipAngle) * r;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (isTurbo) {
+                ctx.font = 'bold 9px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#09090b';
+                ctx.fillText('2x', 0, 0.5);
+            }
+
+            ctx.restore();
+        }
+
+        function renderPuzzle() {
+            ctx.fillStyle = '#0d0d11';
+            ctx.fillRect(0, 0, 330, 330);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            for (const r of [50, 95, 140]) {
+                ctx.beginPath();
+                ctx.arc(CENTER, CENTER, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            nodes.forEach(node => {
+                if (node.size === null) {
+                    ctx.beginPath();
+                    ctx.arc(node.cx, node.cy, 9, 0, Math.PI * 2);
+                    ctx.fillStyle = '#27272a';
+                    ctx.strokeStyle = '#d97706';
+                    ctx.lineWidth = 2;
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(node.cx, node.cy, 3.5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.fill();
+                }
+            });
+
+            if (errorFlashTimer > 0 && errorFlashNode) {
+                errorFlashTimer--;
+                ctx.beginPath();
+                ctx.arc(errorFlashNode.cx, errorFlashNode.cy, GEAR_SPECS[selectedSize].radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.75)';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+
+            nodes.forEach(node => {
+                if (!node.size) return;
+                const spec = GEAR_SPECS[node.size];
+                node.angle += node.speed * 0.022;
+
+                let palette = { fill: '#78350f', stroke: '#b45309', hub: '#d97706' };
+
+                if (node.jammed) {
+                    palette = { fill: '#7f1d1d', stroke: '#ef4444', hub: '#fca5a5' };
+                } else if (node.type === 'driver') {
+                    palette = { fill: '#92400e', stroke: '#f59e0b', hub: '#fde68a' };
+                } else if (node.type === 'fixed') {
+                    palette = { fill: '#3f3f46', stroke: '#a1a1aa', hub: '#e4e4e7' };
+                } else if (node.type === 'target') {
+                    const ok = isTargetSatisfied(node);
+                    const spinningButWrong = node.speed !== 0 && !ok;
+                    if (ok) {
+                        palette = { fill: '#14532d', stroke: '#4ade80', hub: '#bbf7d0' };
+                    } else if (spinningButWrong) {
+                        palette = { fill: '#7f1d1d', stroke: '#f87171', hub: '#fecaca' };
+                    } else {
+                        palette = { fill: '#1e293b', stroke: '#38bdf8', hub: '#bae6fd' };
+                    }
+                }
+
+                drawGearShape(node.cx, node.cy, spec.radius, spec.teeth, node.angle, palette);
+
+                if (node.type === 'driver') {
+                    drawDirectionArrow(node.cx, node.cy, node.dir, '#fde68a', false);
+                } else if (node.type === 'target') {
+                    const ok = isTargetSatisfied(node);
+                    const arrowColor = ok ? '#4ade80' : '#38bdf8';
+                    drawDirectionArrow(node.cx, node.cy, node.targetDir, arrowColor, !!node.minSpeed);
+                }
+            });
+
+            requestAnimationFrame(renderPuzzle);
+        }
+
+        loadLevel(0);
+        renderPuzzle();
+    }
+
+    function initPoetryReader() {
+        const flywheelGear = document.getElementById('flywheelGear');
+        const flywheelNumbers = document.getElementById('flywheelNumbers');
+        const tocList = document.getElementById('tocList');
+        if (!flywheelGear || !flywheelNumbers || !tocList) return;
+
+        const buildPageList = (prefix, startIdx, endIdx) => {
+            const list = [];
+            for (let i = startIdx; i <= endIdx; i++) {
+                list.push(`assets/img/poems/${prefix}_${String(i).padStart(3, '0')}.webp`);
+            }
+            return list;
+        };
+
         const POETRY_DATA = {
             collections: [
                 {
@@ -407,90 +864,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     chapters: [
                         { title: 'Глава I Pt. 1: WoodenGear', startPage: 5 },
                         { title: 'Глава I Pt. 2: Жуткий лес', startPage: 15 },
-                        { title: 'Глава II Pt. 1: Мир больше не десткий', startPage: 23 },
-                        { title: 'Глава II Pt. 2: Весь мазут течет из детства', startPage: 30 },
+                        { title: 'Глава II Pt. 1: Мир больше не детский', startPage: 23 },
+                        { title: 'Глава II Pt. 2: Весь мазут течёт из детства', startPage: 30 },
                         { title: 'Глава III Pt. 1: Чистилище', startPage: 38 },
                         { title: 'Глава III Pt. 2: Путь', startPage: 49 }
                     ],
-                    pages: [
-                        'assets/img/poems/wg_page_002.webp',
-                        'assets/img/poems/wg_page_003.webp',
-                        'assets/img/poems/wg_page_004.webp',
-                        'assets/img/poems/wg_page_005.webp',
-                        'assets/img/poems/wg_page_006.webp',
-                        'assets/img/poems/wg_page_007.webp',
-                        'assets/img/poems/wg_page_008.webp',
-                        'assets/img/poems/wg_page_009.webp',
-                        'assets/img/poems/wg_page_010.webp',
-                        'assets/img/poems/wg_page_011.webp',
-                        'assets/img/poems/wg_page_012.webp',
-                        'assets/img/poems/wg_page_013.webp',
-                        'assets/img/poems/wg_page_014.webp',
-                        'assets/img/poems/wg_page_015.webp',
-                        'assets/img/poems/wg_page_016.webp',
-                        'assets/img/poems/wg_page_017.webp',
-                        'assets/img/poems/wg_page_018.webp',
-                        'assets/img/poems/wg_page_019.webp',
-                        'assets/img/poems/wg_page_020.webp',
-                        'assets/img/poems/wg_page_021.webp',
-                        'assets/img/poems/wg_page_022.webp',
-                        'assets/img/poems/wg_page_023.webp',
-                        'assets/img/poems/wg_page_024.webp',
-                        'assets/img/poems/wg_page_025.webp',
-                        'assets/img/poems/wg_page_026.webp',
-                        'assets/img/poems/wg_page_027.webp',
-                        'assets/img/poems/wg_page_028.webp',
-                        'assets/img/poems/wg_page_029.webp',
-                        'assets/img/poems/wg_page_030.webp',
-                        'assets/img/poems/wg_page_031.webp',
-                        'assets/img/poems/wg_page_032.webp',
-                        'assets/img/poems/wg_page_033.webp',
-                        'assets/img/poems/wg_page_034.webp',
-                        'assets/img/poems/wg_page_035.webp',
-                        'assets/img/poems/wg_page_036.webp',
-                        'assets/img/poems/wg_page_037.webp',
-                        'assets/img/poems/wg_page_038.webp',
-                        'assets/img/poems/wg_page_039.webp',
-                        'assets/img/poems/wg_page_040.webp',
-                        'assets/img/poems/wg_page_041.webp',
-                        'assets/img/poems/wg_page_042.webp',
-                        'assets/img/poems/wg_page_043.webp',
-                        'assets/img/poems/wg_page_044.webp',
-                        'assets/img/poems/wg_page_045.webp',
-                        'assets/img/poems/wg_page_046.webp',
-                        'assets/img/poems/wg_page_047.webp',
-                        'assets/img/poems/wg_page_048.webp',
-                        'assets/img/poems/wg_page_049.webp',
-                        'assets/img/poems/wg_page_050.webp',
-                        'assets/img/poems/wg_page_051.webp',
-                        'assets/img/poems/wg_page_052.webp',
-                        'assets/img/poems/wg_page_053.webp',
-                        'assets/img/poems/wg_page_054.webp',
-                        'assets/img/poems/wg_page_055.webp',
-                        'assets/img/poems/wg_page_056.webp'
-                    ]
+                    pages: buildPageList('wg_page', 2, 56)
                 },
                 {
                     id: 'castle',
                     title: 'II. Непримечательный замок',
                     cover: '',
                     chapters: [
-                        { title: 'Непримечательный замок', startPage: 1 },
+                        { title: 'Непримечательный замок', startPage: 1 }
                     ],
-                    pages: [
-                        'assets/img/poems/csl_page_001.webp',
-                        'assets/img/poems/csl_page_002.webp',
-                        'assets/img/poems/csl_page_003.webp',
-                        'assets/img/poems/csl_page_004.webp',
-                        'assets/img/poems/csl_page_005.webp'
-                    ]
+                    pages: buildPageList('csl_page', 1, 5)
                 }
             ],
             singles: [
                 {
                     id: 'rain',
                     title: 'Дождь',
-                    cover: '',
                     pages: [
                         'assets/img/poems/poem_page_004.webp',
                         'assets/img/poems/poem_page_005.webp'
@@ -499,7 +893,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     id: 'from_above',
                     title: 'Свыше',
-                    cover: '',
                     pages: [
                         'assets/img/poems/poem_page_001.webp'
                     ]
@@ -507,15 +900,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     id: 'writer',
                     title: 'Писатель',
-                    cover: '',
                     pages: [
-                        'assets/img/poems/poem_page_002.webp',
+                        'assets/img/poems/poem_page_002.webp'
                     ]
                 },
                 {
                     id: 'cat',
-                    title: 'Котенок',
-                    cover: '',
+                    title: 'Котёнок',
                     pages: [
                         'assets/img/poems/poem_page_003.webp'
                     ]
@@ -524,8 +915,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const TOOTH_OFFSETS = [
-            0.0, 18.05, 35.1, 52, 69.7, 90.25, 109.7,
-            128.05, 145, 161.95, 180.0, 197.65, 214.4, 230.6,
+            0.0, 18.05, 35.1, 52.0, 69.7, 90.25, 109.7,
+            128.05, 145.0, 161.95, 180.0, 197.65, 214.4, 230.6,
             250.45, 269.95, 289.55, 309.4, 325.6, 342.35
         ];
         const TEETH_COUNT = TOOTH_OFFSETS.length;
@@ -562,6 +953,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let wheelCurrentDeg = 0;
         let wheelTargetDeg = 0;
 
+        let pageLoadRequestId = 0;
+        let activeLoadingImg = null;
+        let currentLoadedPath = '';
+
         function getActivePages() {
             if (currentMode === 'collections') {
                 const book = POETRY_DATA.collections[currentBookIndex];
@@ -571,10 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function hasCover() {
-            if (currentMode === 'collections') {
-                return !!POETRY_DATA.collections[currentBookIndex].cover;
-            }
-            return false;
+            return currentMode === 'collections' && !!POETRY_DATA.collections[currentBookIndex].cover;
         }
 
         function formatPageLabel(pageIndex) {
@@ -604,7 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tocModeGear) {
                 tocModeGear.style.transform = `rotate(${currentBookIndex * 90}deg)`;
             }
-            goToPage(1);
+            goToPage(1, true);
         }
 
         if (prevBookBtn) prevBookBtn.addEventListener('click', () => selectBook(currentBookIndex - 1));
@@ -641,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="reader-toc__dots"></span>
                         <span class="reader-toc__page">Обл</span>
                     `;
-                    li.addEventListener('click', () => goToPage(1));
+                    li.addEventListener('click', () => goToPage(1, true));
                     tocList.appendChild(li);
                 }
 
@@ -659,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="reader-toc__dots"></span>
                         <span class="reader-toc__page">стр. ${ch.startPage}</span>
                     `;
-                    li.addEventListener('click', () => goToPage(realStartPage));
+                    li.addEventListener('click', () => goToPage(realStartPage, true));
                     tocList.appendChild(li);
                 });
             } else {
@@ -677,16 +1069,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     li.addEventListener('click', () => {
                         currentSingleIndex = idx;
-                        goToPage(1);
+                        goToPage(1, true);
                     });
                     tocList.appendChild(li);
                 });
             }
         }
-
-        let pageLoadRequestId = 0;
-        let activeLoadingImg = null;
-        let currentLoadedPath = '';
 
         function goToPage(pageNumber, forceReload = false) {
             const pages = getActivePages();
@@ -702,7 +1090,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentLoadedPath = imgPath;
 
             const currentRequestId = ++pageLoadRequestId;
-
             wheelTargetDeg = getToothAngle(currentPage - 1);
 
             if (changed && poemSheet) {
@@ -713,7 +1100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeLoadingImg) {
                 activeLoadingImg.onload = null;
                 activeLoadingImg.onerror = null;
-                activeLoadingImg.src = '';
                 activeLoadingImg = null;
             }
 
@@ -736,6 +1122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tempImg.onerror = () => {
                 if (currentRequestId === pageLoadRequestId) {
                     poemPageImg.style.display = 'none';
+                    placeholderPath.textContent = `Файл листа: ${imgPath}`;
                     activeLoadingImg = null;
                 }
             };
@@ -775,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (tocModeGear) {
                     tocModeGear.style.transform = `rotate(${currentMode === 'singles' ? 180 : 0}deg)`;
                 }
-                goToPage(1);
+                goToPage(1, true);
             });
         });
 
@@ -788,6 +1175,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.deltaY > 0) goToPage(currentPage + 1);
                 else if (e.deltaY < 0) goToPage(currentPage - 1);
             }, { passive: false });
+
+            let dragStartX = null;
+            let dragStartY = null;
+
+            flywheelArea.addEventListener('pointerdown', e => {
+                if (e.target.closest('.flywheel-tooth-num')) return;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            });
+
+            flywheelArea.addEventListener('pointerup', e => {
+                if (dragStartX === null) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                dragStartX = null;
+                dragStartY = null;
+
+                if (isMobileLayout() && Math.abs(dx) > 28) {
+                    if (dx < 0) goToPage(currentPage + 1);
+                    else goToPage(currentPage - 1);
+                } else if (!isMobileLayout() && Math.abs(dy) > 28) {
+                    if (dy < 0) goToPage(currentPage + 1);
+                    else goToPage(currentPage - 1);
+                }
+            });
         }
 
         const toothButtons = [];
@@ -803,9 +1215,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function animateFlywheel() {
             wheelCurrentDeg += (wheelTargetDeg - wheelCurrentDeg) * 0.08;
-            flywheelGear.style.transform = `rotate(${wheelCurrentDeg}deg)`;
+            const mobileMode = isMobileLayout();
+
+            const gearVisualDeg = mobileMode ? (wheelCurrentDeg + 90) : wheelCurrentDeg;
+            flywheelGear.style.transform = `rotate(${gearVisualDeg}deg)`;
 
             const totalPages = getActivePages().length;
+            const currentWheelWidth = flywheelGear.offsetWidth || 1700;
+            const activeRadius = (currentWheelWidth / 1700) * NUMBER_RADIUS;
+            const baseAngleDeg = mobileMode ? 270.05 : 180.05;
 
             toothButtons.forEach(({ page, el }, idx) => {
                 if (page > totalPages) {
@@ -826,9 +1244,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.display = 'flex';
                 el.classList.toggle('active', page === currentPage);
 
-                const angleRad = (180.05 - relDeg) * (Math.PI / 180);
-                const x = Math.cos(angleRad) * NUMBER_RADIUS;
-                const y = Math.sin(angleRad) * NUMBER_RADIUS;
+                const angleRad = (baseAngleDeg - relDeg) * (Math.PI / 180);
+                const x = Math.cos(angleRad) * activeRadius;
+                const y = Math.sin(angleRad) * activeRadius;
 
                 el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
             });
@@ -836,7 +1254,13 @@ document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(animateFlywheel);
         }
 
-        goToPage(1);
+        goToPage(1, true);
         animateFlywheel();
     }
+
+    initKineticLoop();
+    initPaintCanvas();
+    initLedPong();
+    initGearPuzzle();
+    initPoetryReader();
 });

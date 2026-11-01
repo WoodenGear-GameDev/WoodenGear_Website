@@ -74,6 +74,14 @@
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--left">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/RP_vid.jpg">
+                                        <source src="assets/video/RP_vid.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
                             <article class="profile-card gear-chain__info">
                                 <div class="gear-chain__header">
                                     <h2 class="profile-card__title">Remote Painting</h2>
@@ -83,14 +91,6 @@
                                     Клиент-серверное приложение для совместного рисования по сети в реальном времени, написанное в рамках лабораторной работы в университете.
                                 </p>
                             </article>
-                            <div class="gear-chain__gear">
-                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
-                                <div class="gear-card gear-card--media">
-                                    <video class="gear-media-fill" autoplay loop muted playsinline poster="assets/img/RP_vid.jpg">
-                                        <source src="assets/video/RP_vid.mp4" type="video/mp4">
-                                    </video>
-                                </div>
-                            </div>
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--right">
@@ -101,7 +101,9 @@
                                 </div>
                             </div>
                             <article class="profile-card gear-chain__info">
-                                <h3 class="profile-card__title">Инструменты холста</h3>
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Инструменты холста</h2>
+                                </div>
                                 <p class="profile-card__tagline">
                                     Рисуй прямо внутри шестерёнки мышью или пальцем. Выбери цвет кисти, толщину линии или очисти полотно:
                                 </p>
@@ -111,7 +113,7 @@
                                     <button type="button" class="color-dot" data-color="#38bdf8" style="background:#38bdf8;" aria-label="Голубой"></button>
                                     <button type="button" class="color-dot" data-color="#4ade80" style="background:#4ade80;" aria-label="Зелёный"></button>
                                     <button type="button" class="color-dot" data-color="#ef4444" style="background:#ef4444;" aria-label="Красный"></button>
-                                    <button type="button" class="mini-btn" data-size="4">Тонкая</button>
+                                    <button type="button" class="mini-btn active" data-size="4">Тонкая</button>
                                     <button type="button" class="mini-btn" data-size="9">Толстая</button>
                                     <button type="button" class="mini-btn" id="clearPaintBtn">Очистить</button>
                                 </div>
@@ -119,6 +121,12 @@
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--left">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <img src="assets/img/GemGen.jpg" alt="Скриншот Geometry Generator" class="gear-media-fill" onerror="this.style.display='none'">
+                                </div>
+                            </div>
                             <article class="profile-card gear-chain__info">
                                 <div class="gear-chain__header">
                                     <h2 class="profile-card__title">Geometry Generator</h2>
@@ -128,12 +136,6 @@
                                     Приложение для геометрических вычислений школьного уровня (треугольники, параллелограммы, трапеции) и размещения 2D-фигур в 3D-пространстве для создания чертежей.
                                 </p>
                             </article>
-                            <div class="gear-chain__gear">
-                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
-                                <div class="gear-card gear-card--media">
-                                    <img src="assets/img/GemGen.jpg" alt="Geometry Generator" class="gear-media-fill" onerror="this.style.display='none'">
-                                </div>
-                            </div>
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--right">
@@ -157,9 +159,15 @@
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--left">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <canvas id="ledPongCanvas" width="330" height="330" class="gear-media-fill gear-media-fill--interactive"></canvas>
+                                </div>
+                            </div>
                             <article class="profile-card gear-chain__info">
                                 <div class="gear-chain__header">
-                                    <h3 class="profile-card__title">LED Matrix 8×8</h3>
+                                    <h2 class="profile-card__title">LED Matrix 8×8</h2>
                                     <span class="project-badge" id="pongScoreBadge">Счёт: 0 : 0</span>
                                 </div>
                                 <p class="profile-card__tagline">
@@ -172,19 +180,13 @@
                                     <button type="button" class="mini-btn" id="pongResetBtn">Сброс</button>
                                 </div>
                             </article>
-                            <div class="gear-chain__gear">
-                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
-                                <div class="gear-card gear-card--media">
-                                    <canvas id="ledPongCanvas" width="330" height="330" class="gear-media-fill" style="cursor: pointer;"></canvas>
-                                </div>
-                            </div>
                         </li>
 
                         <li class="gear-chain__item gear-chain__item--right">
                             <div class="gear-chain__gear">
                                 <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--right" aria-hidden="true">
                                 <div class="gear-card gear-card--media">
-                                    <img src="assets/img/LEGO.jpg" alt="Lego Writer" class="gear-media-fill" onerror="this.style.display='none'">
+                                    <img src="assets/img/LEGO.jpg" alt="Печатная машинка Lego Writer" class="gear-media-fill" onerror="this.style.display='none'">
                                 </div>
                             </div>
                             <article class="profile-card gear-chain__info">
@@ -193,8 +195,40 @@
                                     <span class="project-badge">LEGO Mindstorms</span>
                                 </div>
                                 <p class="profile-card__tagline">
-                                    Печатная машинка из LEGO Mindstorms, работающая по принципу, схожим с работой 3D-принтера. Может писать все буквы русского алфавита.
+                                    Печатная машинка из LEGO Mindstorms, работающая по принципу, схожему с работой 3D-принтера. Может писать все буквы русского алфавита.
                                 </p>
+                            </article>
+                        </li>
+
+                        <li class="gear-chain__item gear-chain__item--left">
+                            <div class="gear-chain__gear">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
+                                <div class="gear-card gear-card--media">
+                                    <canvas id="gearPuzzleCanvas" width="330" height="330" class="gear-media-fill gear-media-fill--interactive"></canvas>
+                                </div>
+                            </div>
+                            <article class="profile-card gear-chain__info">
+                                <div class="gear-chain__header">
+                                    <h2 class="profile-card__title">Головоломка: Редуктор</h2>
+                                    <span class="project-badge" id="puzzleStatusBadge">Уровень 1 / 6</span>
+                                </div>
+                                <p class="profile-card__tagline" id="puzzleTaskText">
+                                    Выбери размер шестерёнки и нажимай на свободные оси, чтобы передать вращение в направлении стрелок (клик по установленной шестерне возвращает её на склад).
+                                </p>
+                                <div class="tool-panel">
+                                    <button type="button" class="mini-btn" data-gear-size="S">⚙ Малая [0]</button>
+                                    <button type="button" class="mini-btn active" data-gear-size="M">⚙ Средняя [2]</button>
+                                    <button type="button" class="mini-btn" data-gear-size="L">⚙ Большая [1]</button>
+                                </div>
+                                <div class="tool-panel tool-panel--compact">
+                                    <button type="button" class="mini-btn active" data-puzzle-level="0">Ур. 1</button>
+                                    <button type="button" class="mini-btn" data-puzzle-level="1">Ур. 2</button>
+                                    <button type="button" class="mini-btn" data-puzzle-level="2">Ур. 3</button>
+                                    <button type="button" class="mini-btn" data-puzzle-level="3">Ур. 4</button>
+                                    <button type="button" class="mini-btn" data-puzzle-level="4">Ур. 5</button>
+                                    <button type="button" class="mini-btn" data-puzzle-level="5">Ур. 6</button>
+                                    <button type="button" class="mini-btn" id="puzzleResetBtn">Сброс</button>
+                                </div>
                             </article>
                         </li>
 
@@ -218,7 +252,18 @@
             <h2 class="oil-ocean__title">Социальные сети</h2>
             <div class="oil-ocean__links">
                 <a href="https://t.me/WG_Programming" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
-                    <img src="assets/img/telegram.png" alt="Telegram" class="action-btn__icon">
+                    <img src="assets/img/telegram.png" alt="" class="action-btn__icon">
+                    <span>Разработка</span>
+                </a>
+                <a href="https://t.me/wgpoetry" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
+                    <img src="assets/img/telegram.png" alt="" class="action-btn__icon">
+                    <span>Творчество</span>
+                </a>
+                <a href="https://github.com/WoodenGear-GameDev" target="_blank" rel="noopener noreferrer" class="oil-ocean__link">
+                    <svg class="action-btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>GitHub</span>
                 </a>
             </div>
             <p class="oil-ocean__copy">® Wooden Gear</p>
