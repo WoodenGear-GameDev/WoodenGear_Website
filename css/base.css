@@ -1,0 +1,467 @@
+/* ==========================================================================
+   БАЗОВЫЙ СЛОЙ (css/base.css)
+   Переменные, сброс, типографика, шапка, общие карточки, кнопки и подвал
+   ========================================================================== */
+:root {
+    --color-bg-base: #18181b;
+    --color-bg-card: rgba(10, 10, 10, 0.5);
+    --color-bg-overlay: rgba(18, 18, 20, 0.75);
+
+    --color-text-main: #e4e4e7;
+    --color-text-muted: #b6b6bd;
+    --color-accent: #d97706;
+
+    --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --container-width: 800px;
+    --radius-card: 12px;
+    --radius-pill: 20px;
+
+    --oil-width: 44px;
+
+    --logo-scale: 1;
+    --dev-scale: 1;
+    --poetry-scale: 1;
+    --dev-home-scale: 1;
+    --poetry-home-scale: 1;
+    --chain-scale: 1;
+    --chain-base-height: 4150px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3,
+p,
+.reader-toc__item span:first-child,
+.reader-book-btn span:first-child {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+img,
+a,
+video,
+canvas,
+svg {
+    -webkit-user-drag: none;
+}
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    background-color: var(--color-bg-base);
+    color: var(--color-text-main);
+    font-family: var(--font-main);
+}
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Заголовки секций --- */
+.section-title-wrap {
+    max-width: var(--container-width);
+    margin: 0 auto 24px auto;
+    padding: 0 16px;
+}
+
+.title {
+    text-align: center;
+    font-size: clamp(1.5rem, 4.5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: clamp(3px, 1vw, 12px);
+    text-transform: uppercase;
+    color: var(--color-text-main);
+    margin-bottom: 20px;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 2vw, 24px);
+}
+
+.title::before,
+.title::after {
+    content: "";
+    height: 2.5px;
+    width: clamp(30px, 10vw, 130px);
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+/* --- Шапка и логотип --- */
+.site-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(24px, 5vw, 60px) 16px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    user-select: none;
+    transform: scale(var(--logo-scale));
+    transform-origin: center center;
+}
+
+.logo__gears {
+    position: relative;
+    width: 390px;
+    height: 345px;
+    flex-shrink: 0;
+}
+
+.logo__gear {
+    position: absolute;
+    image-rendering: pixelated;
+    transform-origin: 50% 50%;
+}
+
+.logo__gear--big {
+    width: 255px;
+    height: 255px;
+    top: 5px;
+    left: 0;
+    animation: logo-spin-cw 16.5s linear infinite;
+}
+
+.logo__gear--small {
+    width: 180px;
+    height: 180px;
+    bottom: -15px;
+    right: 18px;
+    animation: logo-spin-ccw 10.5s linear infinite;
+}
+
+.logo__text {
+    height: 240px;
+    width: auto;
+    image-rendering: pixelated;
+    display: block;
+    margin-left: -130px;
+}
+
+/* --- Базовые карточки (наследуются всеми секциями) --- */
+.profile-card {
+    background: var(--color-bg-card);
+    padding: 20px;
+    border-radius: var(--radius-card);
+}
+
+.profile-card__title {
+    margin-bottom: 12px;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    letter-spacing: 0.5px;
+}
+
+.profile-card__tagline {
+    color: var(--color-text-muted);
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    line-height: 1.5;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 14px;
+}
+
+.gear-card {
+    position: relative;
+    z-index: 2;
+    width: 330px;
+    height: 330px;
+    border-radius: 50%;
+    background: rgba(24, 24, 27, 1);
+    backdrop-filter: blur(4px);
+    box-shadow:
+        0 4px 25px rgba(0, 0, 0, 0.7),
+        inset 0 0 18px rgba(0, 0, 0, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 14px 20px 28px 20px;
+    color: var(--color-text-main);
+    user-select: none;
+}
+
+.gear-card__icon {
+    width: 50px;
+    height: 50px;
+    margin: 10px;
+}
+
+.gear-card__title {
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.gear-card__list {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.gear-card__desc {
+    font-size: 1.35rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.gear-card__desc--sm {
+    font-size: 1.15rem;
+    margin-top: 2px;
+}
+
+.gear-card__desc::before {
+    content: "• ";
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+/* --- Вращающиеся зубчатые венцы --- */
+.content__gear-mesh {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform-origin: 50% 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.content__gear--left {
+    transform: rotate(var(--gear-deg, 0deg));
+    will-change: transform;
+}
+
+.content__gear--right {
+    transform: rotate(calc(-1 * var(--gear-deg, 0deg) + 15deg));
+    will-change: transform;
+}
+
+/* --- Базовые кнопки и бейджи --- */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 30px;
+    font-family: var(--font-main);
+    font-size: 1.35rem;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    text-decoration: none;
+    background: rgba(24, 24, 27, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    border-color: var(--color-accent);
+    background: rgba(35, 35, 40, 0.95);
+    box-shadow: 0 8px 25px rgba(217, 119, 6, 0.25);
+}
+
+.action-btn__icon {
+    width: 35px;
+    height: 35px;
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover .action-btn__icon {
+    transform: rotate(360deg);
+}
+
+.mini-btn {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-main);
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.mini-btn:hover,
+.mini-btn.active {
+    border-color: var(--color-accent);
+    background: rgba(217, 119, 6, 0.22);
+}
+
+.mini-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.project-badge {
+    background: rgba(217, 119, 6, 0.15);
+    border: 1px solid var(--color-accent);
+    color: var(--color-text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+/* --- Волны и подвал (Океан мазута) --- */
+.oil-ocean__waves {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: calc(70px * var(--poetry-scale));
+    min-height: 24px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.oil-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    display: block;
+    transform-origin: center bottom;
+    will-change: transform;
+}
+
+.oil-wave--back {
+    fill: #121216;
+    animation: wave-drift 16s linear infinite;
+}
+
+.oil-wave--front {
+    fill: #050506;
+    animation: wave-drift 11s linear reverse infinite;
+}
+
+.oil-ocean {
+    width: 100%;
+    background: linear-gradient(180deg, #050506 0%, #000000 100%);
+    padding: 40px 20px 70px 20px;
+    position: relative;
+    z-index: 3;
+    text-align: center;
+}
+
+.oil-ocean__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.oil-ocean__title {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--color-text-main);
+}
+
+.oil-ocean__links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.oil-ocean__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 28px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--color-text-main);
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.oil-ocean__link:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.25);
+}
+
+.oil-ocean__copy {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+@keyframes wave-drift {
+    0%   { transform: translate3d(0, 0, 0) scaleY(1); }
+    50%  { transform: translate3d(-25%, 0, 0) scaleY(1.12); }
+    100% { transform: translate3d(-50%, 0, 0) scaleY(1); }
+}
+
+@keyframes logo-spin-cw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes logo-spin-ccw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+}
+
+@media (max-width: 820px) {
+    .oil-ocean__links {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .oil-ocean__link {
+        justify-content: center;
+        padding: 14px 24px;
+        font-size: 1.15rem;
+    }
+}

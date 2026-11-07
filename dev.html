@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WoodenGear — Разработка и проекты</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/chain.css">
+    <link rel="stylesheet" href="css/dev.css">
 
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/gear_2.png">
     <link rel="apple-touch-icon" href="assets/img/gear_2.png">
@@ -111,7 +113,7 @@
                                 <p class="profile-card__tagline">
                                     Рисуй прямо внутри шестерёнки мышью или пальцем. Выбери цвет кисти, толщину линии или очисти полотно:
                                 </p>
-                                <div class="tool-panel">
+                                <div class="tool-panel tool-panel--paint">
                                     <button type="button" class="color-dot active" data-color="#d97706" style="background:#d97706;" aria-label="Янтарный"></button>
                                     <button type="button" class="color-dot" data-color="#e4e4e7" style="background:#e4e4e7;" aria-label="Белый"></button>
                                     <button type="button" class="color-dot" data-color="#38bdf8" style="background:#38bdf8;" aria-label="Голубой"></button>
@@ -170,18 +172,18 @@
                                 </div>
                             </div>
                             <article class="profile-card gear-chain__info">
-                                <div class="gear-chain__header">
+                                <div class="gear-chain__header gear-chain__header--inline">
                                     <h2 class="profile-card__title">LED Matrix 8×8</h2>
                                     <span class="project-badge" id="pongScoreBadge">Счёт: 0 : 0</span>
                                 </div>
                                 <p class="profile-card__tagline">
-                                    Нажми «Подача» (или кликни по матрице), чтобы запустить мяч. Двигай левую платформу курсором или кнопками:
+                                    Нажми «Подача» (или коснись матрицы), чтобы запустить мяч. Веди пальцем прямо по матрице или удерживай кнопки:
                                 </p>
-                                <div class="tool-panel">
-                                    <button type="button" class="mini-btn active" id="pongStartBtn">▶ Подача</button>
-                                    <button type="button" class="mini-btn" id="pongUp">▲ Вверх</button>
-                                    <button type="button" class="mini-btn" id="pongDown">▼ Вниз</button>
-                                    <button type="button" class="mini-btn" id="pongResetBtn">Сброс</button>
+                                <div class="tool-panel tool-panel--pong">
+                                    <button type="button" class="mini-btn pong-btn pong-btn--dir" id="pongUp">▲ Вверх</button>
+                                    <button type="button" class="mini-btn pong-btn pong-btn--dir" id="pongDown">▼ Вниз</button>
+                                    <button type="button" class="mini-btn pong-btn active" id="pongStartBtn">▶ Подача</button>
+                                    <button type="button" class="mini-btn pong-btn" id="pongResetBtn">Сброс</button>
                                 </div>
                             </article>
                         </li>
@@ -204,34 +206,42 @@
                             </article>
                         </li>
 
-                        <li class="gear-chain__item gear-chain__item--left">
-                            <div class="gear-chain__gear">
-                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left" aria-hidden="true">
-                                <div class="gear-card gear-card--media">
-                                    <canvas id="gearPuzzleCanvas" width="330" height="330" class="gear-media-fill gear-media-fill--interactive"></canvas>
-                                </div>
+                        <li class="gear-chain__item gear-chain__item--left gear-chain__item--puzzle">
+                            <div class="gear-chain__gear puzzle-drive-gear" aria-hidden="true">
+                                <img src="assets/img/gear_3.webp" alt="" class="content__gear-mesh content__gear--left">
+                                <div class="puzzle-drive-hub"></div>
                             </div>
-                            <article class="profile-card gear-chain__info">
-                                <div class="gear-chain__header">
-                                    <h2 class="profile-card__title">Головоломка: Редуктор</h2>
-                                    <span class="project-badge" id="puzzleStatusBadge">Уровень 1 / 6</span>
+
+                            <article class="profile-card puzzle-terminal">
+                                <div class="puzzle-terminal__header">
+                                    <div class="puzzle-terminal__title-row">
+                                        <h2 class="profile-card__title">Головоломка: Редуктор</h2>
+                                        <span class="project-badge" id="puzzleStatusBadge">Уровень 1 / 6</span>
+                                    </div>
+                                    <p class="profile-card__tagline puzzle-terminal__task" id="puzzleTaskText">
+                                        Выбери размер шестерёнки внизу и нажимай на свободные оси на экране, чтобы передать вращение в направлении стрелок.
+                                    </p>
                                 </div>
-                                <p class="profile-card__tagline" id="puzzleTaskText">
-                                    Выбери размер шестерёнки и нажимай на свободные оси, чтобы передать вращение в направлении стрелок (клик по установленной шестерне возвращает её на склад).
-                                </p>
-                                <div class="tool-panel">
-                                    <button type="button" class="mini-btn" data-gear-size="S">⚙ Малая [0]</button>
-                                    <button type="button" class="mini-btn active" data-gear-size="M">⚙ Средняя [2]</button>
-                                    <button type="button" class="mini-btn" data-gear-size="L">⚙ Большая [1]</button>
+
+                                <div class="puzzle-terminal__screen">
+                                    <canvas id="gearPuzzleCanvas" width="680" height="400" class="puzzle-terminal__canvas"></canvas>
                                 </div>
-                                <div class="tool-panel tool-panel--compact">
-                                    <button type="button" class="mini-btn active" data-puzzle-level="0">Ур. 1</button>
-                                    <button type="button" class="mini-btn" data-puzzle-level="1">Ур. 2</button>
-                                    <button type="button" class="mini-btn" data-puzzle-level="2">Ур. 3</button>
-                                    <button type="button" class="mini-btn" data-puzzle-level="3">Ур. 4</button>
-                                    <button type="button" class="mini-btn" data-puzzle-level="4">Ур. 5</button>
-                                    <button type="button" class="mini-btn" data-puzzle-level="5">Ур. 6</button>
-                                    <button type="button" class="mini-btn" id="puzzleResetBtn">Сброс</button>
+
+                                <div class="puzzle-terminal__controls">
+                                    <div class="puzzle-stock-bar">
+                                        <button type="button" class="mini-btn puzzle-stock-btn" data-gear-size="S">⚙ Малая (8) [0]</button>
+                                        <button type="button" class="mini-btn puzzle-stock-btn active" data-gear-size="M">⚙ Средняя (12) [2]</button>
+                                        <button type="button" class="mini-btn puzzle-stock-btn" data-gear-size="L">⚙ Большая (16) [1]</button>
+                                    </div>
+
+                                    <div class="puzzle-level-bar">
+                                        <button type="button" class="mini-btn puzzle-nav-btn" id="puzzlePrevLevelBtn" title="Предыдущий уровень">◀</button>
+                                        <div class="puzzle-level-select-wrap">
+                                            <select id="puzzleLevelSelect" class="puzzle-level-select" aria-label="Выбор уровня головоломки"></select>
+                                        </div>
+                                        <button type="button" class="mini-btn puzzle-nav-btn" id="puzzleNextLevelBtn" title="Следующий уровень">▶</button>
+                                        <button type="button" class="mini-btn puzzle-reset-btn" id="puzzleResetBtn">↺ Сброс</button>
+                                    </div>
                                 </div>
                             </article>
                         </li>
@@ -274,6 +284,9 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/paint.js"></script>
+    <script src="js/pong.js"></script>
+    <script src="js/puzzle.js"></script>
 </body>
 </html>

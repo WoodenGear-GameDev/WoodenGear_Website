@@ -1,0 +1,536 @@
+/* ==========================================================================
+   СТРАНИЦА ПОЭЗИИ (css/poetry.css)
+   Наследует базовые карточки и кнопки из css/base.css
+   ========================================================================== */
+.poetry-reader {
+    width: 100%;
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.projects-page__nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.projects-page__back-btn {
+    padding: 8px 24px;
+    font-size: 1.1rem;
+}
+
+.reader-viewport {
+    position: relative;
+    width: 100%;
+    height: calc(1220px * var(--poetry-scale));
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
+.reader-canvas {
+    position: relative;
+    width: 1600px;
+    height: 1220px;
+    flex-shrink: 0;
+    transform: scale(var(--poetry-scale));
+    transform-origin: top center;
+}
+
+.reader-toc {
+    position: absolute;
+    top: 30px;
+    left: 25px;
+    width: 420px;
+    max-height: 990px;
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+}
+
+.reader-toc__modes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reader-toc__mode-gear {
+    width: 38px;
+    height: 38px;
+    image-rendering: pixelated;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reader-toc__shelf {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+}
+
+.reader-toc__shelf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.reader-toc__shelf-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.reader-toc__shelf-arrows {
+    display: flex;
+    gap: 6px;
+}
+
+.reader-toc__arrow {
+    padding: 2px 10px;
+    font-size: 0.8rem;
+}
+
+.reader-toc__books {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.reader-book-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-muted);
+    font-family: var(--font-main);
+    font-size: 0.98rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.reader-book-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-main);
+}
+
+.reader-book-btn.active {
+    background: rgba(217, 119, 6, 0.2);
+    border-color: var(--color-accent);
+    color: var(--color-text-main);
+}
+
+.reader-book-btn__meta {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.reader-toc__heading {
+    font-size: 1.45rem;
+    margin-bottom: 12px;
+}
+
+.reader-toc__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 4px;
+    max-height: 520px;
+}
+
+.reader-toc__item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+}
+
+.reader-toc__item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-text-main);
+    transform: translateX(3px);
+}
+
+.reader-toc__item.active {
+    background: rgba(217, 119, 6, 0.16);
+    border-color: var(--color-accent);
+    color: var(--color-text-main);
+    font-weight: 600;
+}
+
+.reader-toc__dots {
+    flex-grow: 1;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
+    margin: 0 6px;
+}
+
+.reader-toc__page {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.reader-toc__hint {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.88rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.reader-stage {
+    position: absolute;
+    top: 30px;
+    left: 475px;
+    width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    z-index: 4;
+}
+
+.reader-sheet {
+    position: relative;
+    width: 700px;
+    height: 990px;
+    background: #141417;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: pan-y;
+    transition: transform 0.28s ease, opacity 0.28s ease;
+}
+
+.reader-sheet:active {
+    cursor: grabbing;
+}
+
+.reader-sheet.sheet-turning {
+    transform: translateY(-8px) scale(0.985);
+    opacity: 0.55;
+}
+
+.reader-sheet__img {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+}
+
+.reader-sheet__placeholder {
+    position: absolute;
+    inset: 32px;
+    border: 2px dashed rgba(217, 119, 6, 0.35);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    gap: 16px;
+    z-index: 1;
+    background: rgba(20, 20, 24, 0.7);
+    transition: opacity 0.2s ease;
+}
+
+.reader-sheet__placeholder h3 {
+    font-size: 2rem;
+    color: var(--color-text-main);
+}
+
+.reader-sheet__placeholder p {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    word-break: break-all;
+}
+
+.reader-sheet__page-num {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.reader-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.reader-pointer {
+    position: absolute;
+    top: 525px;
+    left: 1185px;
+    width: 115px;
+    height: 60px;
+    transform: translateY(-50%);
+    z-index: 6;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reader-pointer__arrow {
+    width: 0;
+    height: 0;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+    border-left: 26px solid var(--color-accent);
+    filter: drop-shadow(0 0 10px rgba(217, 119, 6, 0.6));
+}
+
+.reader-flywheel-mask {
+    position: absolute;
+    top: 0;
+    left: 1200px;
+    width: 650px;
+    height: 1120px;
+    overflow: hidden;
+    z-index: 3;
+
+    -webkit-mask-image:
+        linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%),
+        linear-gradient(to right, black 0%, black 45%, transparent 98%);
+    -webkit-mask-composite: source-in;
+
+    mask-image:
+        linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%),
+        linear-gradient(to right, black 0%, black 45%, transparent 98%);
+    mask-composite: intersect;
+}
+
+.reader-flywheel {
+    position: absolute;
+    top: -325px;
+    left: 95px;
+    width: 1700px;
+    height: 1700px;
+    user-select: none;
+    cursor: grab;
+}
+
+.reader-flywheel:active {
+    cursor: grabbing;
+}
+
+.reader-flywheel__gear {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    filter: drop-shadow(-10px 0 25px rgba(0, 0, 0, 0.85));
+}
+
+.reader-flywheel__numbers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.flywheel-tooth-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 54px;
+    height: 54px;
+    margin-top: -27px;
+    margin-left: -27px;
+    border-radius: 50%;
+    background: rgba(20, 20, 24, 0.94);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    color: var(--color-text-muted);
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.85);
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.25s, color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+
+.flywheel-tooth-num:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text-main);
+}
+
+.flywheel-tooth-num.active {
+    background: var(--color-accent);
+    border-color: #fde68a;
+    color: #09090b;
+    box-shadow: 0 0 22px rgba(217, 119, 6, 0.8);
+}
+
+@media (max-width: 820px) {
+    .projects-page__back-btn {
+        padding: 12px 28px;
+        font-size: 1.15rem;
+    }
+
+    .reader-viewport {
+        height: auto;
+        overflow: hidden;
+    }
+
+    .reader-canvas {
+        width: 100%;
+        height: auto;
+        transform: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 14px 0 14px;
+        gap: 24px;
+    }
+
+    .reader-toc {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-width: 540px;
+        max-height: none;
+    }
+
+    .reader-toc__modes .mini-btn {
+        flex: 1;
+        padding: 10px 14px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .reader-toc__arrow {
+        padding: 6px 14px;
+        font-size: 0.95rem;
+    }
+
+    .reader-toc__list {
+        max-height: 280px;
+    }
+
+    .reader-stage {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-width: 540px;
+    }
+
+    .reader-sheet {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 700 / 990;
+    }
+
+    .reader-sheet__placeholder {
+        inset: 16px;
+        padding: 18px;
+    }
+
+    .reader-sheet__placeholder h3 {
+        font-size: 1.35rem;
+    }
+
+    .reader-controls {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .reader-controls .mini-btn {
+        padding: 10px 16px;
+        font-size: 1rem;
+    }
+
+    .reader-pointer {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 40px;
+        height: 40px;
+        margin-bottom: -22px;
+        transform: rotate(90deg);
+        z-index: 6;
+    }
+
+    .reader-flywheel-mask {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100vw;
+        height: 270px;
+        overflow: hidden;
+        z-index: 3;
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+    }
+
+    .reader-flywheel {
+        position: absolute;
+        top: 28px;
+        left: 50%;
+        width: 920px;
+        height: 920px;
+        transform: translateX(-50%);
+        touch-action: pan-y;
+    }
+
+    .flywheel-tooth-num {
+        width: 44px;
+        height: 44px;
+        margin-top: -22px;
+        margin-left: -22px;
+        font-size: 1.05rem;
+    }
+
+    .poetry-reader .oil-ocean__waves {
+        height: 42px;
+    }
+}

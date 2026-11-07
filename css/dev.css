@@ -1,0 +1,348 @@
+/* ==========================================================================
+   ИНТЕРАКТИВНЫЕ МОДУЛИ СТРАНИЦЫ РАЗРАБОТКИ (css/dev.css)
+   Расширяет css/chain.css (Холст рисования, Матрица 8x8 и Стенд головоломки)
+   ========================================================================== */
+.gear-media-fill--paint {
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.gear-media-fill--interactive {
+    cursor: pointer;
+    touch-action: none;
+}
+
+.tool-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tool-panel--compact {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.color-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-dot.active {
+    border-color: #ffffff;
+    transform: scale(1.18);
+}
+
+/* --- Инженерный стенд головоломки (.gear-chain__item--puzzle) --- */
+.gear-chain__item--puzzle {
+    height: 820px;
+}
+
+.puzzle-drive-gear {
+    z-index: 1;
+    filter: brightness(0.85) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
+}
+
+.puzzle-drive-hub {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #27272a 0%, #141417 70%, #09090b 100%);
+    border: 4px solid rgba(217, 119, 6, 0.45);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.95);
+    z-index: 2;
+}
+
+.puzzle-terminal {
+    position: absolute;
+    top: 140px;
+    left: 200px;
+    width: 900px;
+    z-index: 4;
+    padding: 24px 26px;
+    background: rgba(16, 16, 20, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 16px;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(217, 119, 6, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.puzzle-terminal__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.puzzle-terminal__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.puzzle-terminal__title-row .profile-card__title {
+    margin-bottom: 0;
+    font-size: 1.9rem;
+}
+
+.puzzle-terminal__task {
+    font-size: 1.12rem;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.puzzle-terminal__screen {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0b0c10;
+    border: 2px solid rgba(217, 119, 6, 0.38);
+    box-shadow:
+        inset 0 0 28px rgba(0, 0, 0, 0.95),
+        0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.puzzle-terminal__canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 680 / 400;
+    display: block;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.puzzle-terminal__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.puzzle-stock-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.puzzle-stock-btn {
+    padding: 10px 14px;
+    font-size: 1.05rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.puzzle-level-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.puzzle-nav-btn {
+    padding: 8px 18px;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.puzzle-level-select-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.puzzle-level-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--color-text-main);
+    font-family: var(--font-main);
+    font-size: 1.02rem;
+    font-weight: 600;
+    padding: 8px 36px 8px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.puzzle-level-select:hover,
+.puzzle-level-select:focus {
+    border-color: var(--color-accent);
+    background: rgba(217, 119, 6, 0.16);
+}
+
+.puzzle-level-select option {
+    background: #18181b;
+    color: var(--color-text-main);
+}
+
+.puzzle-level-select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.puzzle-reset-btn {
+    padding: 8px 20px;
+    font-size: 1.02rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 820px) {
+    .tool-panel {
+        gap: 12px;
+    }
+
+    .gear-chain__info .mini-btn {
+        font-size: 1.25rem;
+        padding: 10px 18px;
+        border-radius: 18px;
+    }
+
+    .tool-panel--paint {
+        gap: 16px;
+    }
+
+    .tool-panel--paint .color-dot {
+        width: 56px;
+        height: 56px;
+        border-width: 3px;
+    }
+
+    .tool-panel--paint .mini-btn {
+        flex: 1 1 calc(33% - 12px);
+        font-size: 1.45rem;
+        padding: 15px 18px;
+        border-radius: 20px;
+        text-align: center;
+    }
+
+    .tool-panel--pong {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .tool-panel--pong .pong-btn {
+        width: 100%;
+        font-size: 1.45rem;
+        padding: 16px 14px;
+        border-radius: 20px;
+        text-align: center;
+    }
+
+    .tool-panel--pong .pong-btn--dir {
+        font-size: 1.6rem;
+        padding: 22px 14px;
+        background: rgba(217, 119, 6, 0.16);
+        border-color: rgba(217, 119, 6, 0.55);
+    }
+
+    .tool-panel--pong .pong-btn--dir:active {
+        background: rgba(217, 119, 6, 0.4);
+        transform: scale(0.96);
+    }
+
+    /* Увеличенные кнопки и элементы управления в головоломке на мобильных */
+    .gear-chain__item--puzzle {
+        height: 1320px;
+    }
+
+    .puzzle-terminal {
+        top: 140px;
+        left: 4px;
+        width: 912px;
+        padding: 30px;
+        gap: 24px;
+        border-radius: 24px;
+    }
+
+    .puzzle-terminal__title-row .profile-card__title {
+        font-size: 2.55rem;
+    }
+
+    .puzzle-terminal .project-badge {
+        font-size: 1.55rem;
+        padding: 10px 22px;
+        border-radius: 20px;
+    }
+
+    .puzzle-terminal__task {
+        font-size: 1.72rem;
+        line-height: 1.45;
+    }
+
+    .puzzle-terminal__controls {
+        gap: 20px;
+    }
+
+    .puzzle-stock-bar {
+        gap: 16px;
+    }
+
+    .puzzle-stock-btn {
+        padding: 28px 10px;
+        font-size: 1.85rem;
+        border-radius: 22px;
+        border-width: 2px;
+    }
+
+    /* На мобильных панель уровней строится в 2 крупных ряда */
+    .puzzle-level-bar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        padding-top: 20px;
+    }
+
+    .puzzle-nav-btn {
+        padding: 24px 36px;
+        font-size: 2.1rem;
+        border-radius: 22px;
+        border-width: 2px;
+    }
+
+    .puzzle-level-select {
+        padding: 24px 52px 24px 24px;
+        font-size: 1.85rem;
+        border-radius: 22px;
+        border-width: 2px;
+    }
+
+    .puzzle-level-select-wrap::after {
+        right: 22px;
+        font-size: 1.85rem;
+    }
+
+    .puzzle-reset-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        padding: 24px;
+        font-size: 1.9rem;
+        border-radius: 22px;
+        border-width: 2px;
+        text-align: center;
+    }
+}
