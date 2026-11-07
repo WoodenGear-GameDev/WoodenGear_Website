@@ -1,5 +1,137 @@
 window.WG = window.WG || {};
 
+WG.GEAR_TOL = 2.5;
+
+// Gear rings present on an axle. A dual axle always carries its built-in ring;
+// the ring the player adds (always the larger one) turns on the same shaft.
+WG.gearRings = function (node, specs) {
+    if (node.type === 'dual') {
+        return node.size ? [specs[node.base], specs[node.size]] : [specs[node.base]];
+    }
+    return node.size ? [specs[node.size]] : [];
+};
+
+// Two axles may stand side by side if some pair of their rings meshes
+// or if they do not touch at all.
+WG.gearsCompatible = function (a, b, specs) {
+    const ringsA = WG.gearRings(a, specs);
+    const ringsB = WG.gearRings(b, specs);
+    if (ringsA.length === 0 || ringsB.length === 0) return true;
+    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+    let maxA = 0;
+    let maxB = 0;
+    for (const p of ringsA) {
+        maxA = Math.max(maxA, p.radius);
+        for (const q of ringsB) {
+            if (Math.abs(dist - (p.radius + q.radius)) <= WG.GEAR_TOL) return true;
+        }
+    }
+    for (const q of ringsB) maxB = Math.max(maxB, q.radius);
+    return dist >= maxA + maxB - WG.GEAR_TOL;
+};
+
+// Speed check of a spinning target shaft: 'ok', 'slow' or 'fast'.
+WG.targetSpeedState = function (t) {
+    const v = Math.abs(t.speed);
+    if (t.exactSpeed) {
+        if (v < t.exactSpeed - 0.05) return 'slow';
+        if (v > t.exactSpeed + 0.05) return 'fast';
+        return 'ok';
+    }
+    if (t.minSpeed && v < t.minSpeed) return 'slow';
+    if (t.maxSpeed && v > t.maxSpeed + 0.05) return 'fast';
+    return 'ok';
+};
+
+// Spreads rotation from the motors through meshing rings and belts.
+// Sets node.speed / node.jammed and reports what, if anything, jammed the drive.
+WG.computeGearKinematics = function (nodes, belts, specs) {
+    nodes.forEach(n => {
+        n.speed = 0;
+        n.jammed = false;
+    });
+
+    const active = nodes.filter(n => WG.gearRings(n, specs).length > 0);
+    const rings = new Map(active.map(n => [n, WG.gearRings(n, specs)]));
+    const beltLinks = new Map();
+    (belts || []).forEach(belt => {
+        if (!rings.has(belt.a) || !rings.has(belt.b)) return;
+        if (!beltLinks.has(belt.a)) beltLinks.set(belt.a, []);
+        if (!beltLinks.has(belt.b)) beltLinks.set(belt.b, []);
+        beltLinks.get(belt.a).push({ other: belt.b, cross: !!belt.cross });
+        beltLinks.get(belt.b).push({ other: belt.a, cross: !!belt.cross });
+    });
+
+    let conflict = false;
+    let ratchetLock = false;
+    let stuckHit = false;
+    const queue = [];
+
+    const drive = (curr, next, expectedSpeed) => {
+        if (next.type === 'stuck') {
+            stuckHit = true;
+            curr.jammed = true;
+            next.jammed = true;
+            return;
+        }
+        if (next.speed === 0) {
+            next.speed = expectedSpeed;
+            if (next.type === 'ratchet' && Math.sign(expectedSpeed) !== next.allowDir) {
+                ratchetLock = true;
+                next.jammed = true;
+            }
+            queue.push(next);
+        } else if (Math.abs(next.speed - expectedSpeed) > 0.05) {
+            conflict = true;
+            curr.jammed = true;
+            next.jammed = true;
+        }
+    };
+
+    active.forEach(n => {
+        if (n.type === 'driver') {
+            n.speed = n.dir * 1.0;
+            queue.push(n);
+        }
+    });
+
+    while (queue.length > 0) {
+        const curr = queue.shift();
+        const currRings = rings.get(curr);
+
+        for (const next of active) {
+            if (next === curr) continue;
+            const dist = Math.hypot(curr.x - next.x, curr.y - next.y);
+            for (const a of currRings) {
+                for (const b of rings.get(next)) {
+                    if (Math.abs(dist - (a.radius + b.radius)) <= WG.GEAR_TOL) {
+                        drive(curr, next, -curr.speed * (a.teeth / b.teeth));
+                    }
+                }
+            }
+        }
+
+        for (const link of (beltLinks.get(curr) || [])) {
+            const za = currRings[0].teeth;
+            const zb = rings.get(link.other)[0].teeth;
+            drive(curr, link.other, (link.cross ? -1 : 1) * curr.speed * (za / zb));
+        }
+    }
+
+    const isJammed = conflict || ratchetLock || stuckHit;
+    if (isJammed) {
+        active.forEach(n => {
+            if (n.speed !== 0) n.jammed = true;
+            n.speed = 0;
+        });
+    }
+    let jamKind = null;
+    if (stuckHit) jamKind = 'stuck';
+    else if (ratchetLock) jamKind = 'ratchet';
+    else if (conflict) jamKind = 'conflict';
+    return { isJammed, jamKind };
+};
+
 WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
     constructor(canvasId = 'gearPuzzleCanvas') {
         super(canvasId);
@@ -257,6 +389,174 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
                     { id: 'p12',    x:  180, y:   84, type: 'pin',    size: null },
                     { id: 'p13',    x:  -60, y:  -84, type: 'pin',    size: null }
                 ]
+            },
+            {
+                name: 'Ремённая передача',
+                hint: 'Ремень крутит обе шестерни в ОДНУ сторону. Ржавые шестерни не вращаются: задел такую — и привод заклинило. Вал «≤1x» хрупкий: не крути его быстрее мотора.',
+                inventory: { S: 6, M: 3, L: 1 },
+                belts: [{ a: 'idlerA', b: 'trgB', cross: false }],
+                nodes: [
+                    { id: 'drvA',   x: -156, y:  -24, type: 'driver',  size: 'L', dir: -1 },
+                    { id: 'drvB',   x:  132, y:  -24, type: 'driver',  size: 'M', dir: 1 },
+                    { id: 'idlerA', x:   48, y:  -12, type: 'fixed',   size: 'S' },
+                    { id: 'rustA',  x:   60, y:  -72, type: 'stuck',   size: 'S' },
+                    { id: 'rustB',  x:   84, y:   84, type: 'stuck',   size: 'S' },
+                    { id: 'trgA',   x:  168, y:  -84, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgB',   x:  -84, y:  -84, type: 'target',  size: 'M', targetDir: -1, maxSpeed: 1 },
+                    { id: 'trgC',   x:  156, y:   72, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgD',   x:  -24, y:   24, type: 'target',  size: 'S', targetDir: -1, minSpeed: 1.9 },
+                    { id: 'p1',     x: -156, y:   48, type: 'pin',     size: null },
+                    { id: 'p2',     x:  120, y:  -84, type: 'pin',     size: null },
+                    { id: 'p3',     x:  -96, y:   60, type: 'pin',     size: null },
+                    { id: 'p4',     x:  -36, y:   72, type: 'pin',     size: null },
+                    { id: 'p5',     x:   96, y:   24, type: 'pin',     size: null },
+                    { id: 'p6',     x:   48, y:   36, type: 'pin',     size: null },
+                    { id: 'p7',     x:  168, y:   24, type: 'pin',     size: null },
+                    { id: 'p8',     x:  -36, y:  -24, type: 'pin',     size: null },
+                    { id: 'p9',     x:  -84, y:  -24, type: 'pin',     size: null },
+                    { id: 'p10',    x:   36, y:   84, type: 'pin',     size: null },
+                    { id: 'p11',    x: -132, y:   84, type: 'pin',     size: null },
+                    { id: 'p12',    x:  -24, y:  -72, type: 'pin',     size: null }
+                ]
+            },
+            {
+                name: 'Храповик',
+                hint: 'Бирюзовый храповик вращается только по своей стрелке, иначе стопорит весь привод. Перекрёстный ремень меняет направление, как обычное зацепление.',
+                inventory: { S: 5, M: 2, L: 1 },
+                belts: [{ a: 'idlerA', b: 'trgC', cross: true }],
+                nodes: [
+                    { id: 'drvA',     x: -156, y:  -12, type: 'driver',  size: 'L', dir: -1 },
+                    { id: 'drvB',     x:  144, y:   48, type: 'driver',  size: 'M', dir: 1 },
+                    { id: 'drvC',     x:   36, y:  -36, type: 'driver',  size: 'S', dir: -1 },
+                    { id: 'ratchetA', x:  -96, y:   72, type: 'ratchet', size: 'L', allowDir: -1 },
+                    { id: 'ratchetB', x:   24, y:   84, type: 'ratchet', size: 'S', allowDir: -1 },
+                    { id: 'idlerA',   x:   72, y:   36, type: 'fixed',   size: 'S' },
+                    { id: 'trgA',     x:  144, y:  -24, type: 'target',  size: 'M', targetDir: -1, maxSpeed: 1 },
+                    { id: 'trgB',     x:  -60, y:  -84, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgC',     x:   84, y:  -72, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgD',     x:  -24, y:   24, type: 'target',  size: 'S', targetDir: -1, exactSpeed: 2 },
+                    { id: 'p1',       x: -168, y:   60, type: 'pin',     size: null },
+                    { id: 'p2',       x:  -12, y:  -36, type: 'pin',     size: null },
+                    { id: 'p3',       x:  -24, y:   84, type: 'pin',     size: null },
+                    { id: 'p4',       x:  -12, y:  -84, type: 'pin',     size: null },
+                    { id: 'p5',       x:   72, y:   84, type: 'pin',     size: null },
+                    { id: 'p6',       x:  132, y:  -84, type: 'pin',     size: null },
+                    { id: 'p7',       x:   84, y:  -24, type: 'pin',     size: null },
+                    { id: 'p8',       x:   24, y:   36, type: 'pin',     size: null },
+                    { id: 'p9',       x:   36, y:  -84, type: 'pin',     size: null },
+                    { id: 'p10',      x: -120, y:  -84, type: 'pin',     size: null },
+                    { id: 'p11',      x: -168, y:  -84, type: 'pin',     size: null },
+                    { id: 'p12',      x:  180, y:  -72, type: 'pin',     size: null }
+                ]
+            },
+            {
+                name: 'Двойные оси',
+                hint: 'На фиолетовую ось надень шестерню крупнее встроенной: кольца вращаются вместе, а соседи цепляются за то, до которого дотянутся. Так скорость умножается: 3x, 0,5x.',
+                inventory: { S: 4, M: 5, L: 1 },
+                nodes: [
+                    { id: 'drvA',  x: -144, y:    0, type: 'driver',  size: 'L', dir: -1 },
+                    { id: 'drvB',  x:  132, y:  -24, type: 'driver',  size: 'S', dir: 1 },
+                    { id: 'dualA', x:   12, y:  -12, type: 'dual',    base: 'S', size: null },
+                    { id: 'dualB', x:  -96, y:  -84, type: 'dual',    base: 'S', size: null },
+                    { id: 'rustA', x:   84, y:   60, type: 'stuck',   size: 'M' },
+                    { id: 'trgA',  x:  -36, y:  -84, type: 'target',  size: 'S', targetDir: 1, exactSpeed: 3 },
+                    { id: 'trgB',  x:  -36, y:    0, type: 'target',  size: 'S', targetDir: -1, exactSpeed: 0.5 },
+                    { id: 'trgC',  x:  168, y:  -72, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgD',  x:    0, y:   84, type: 'target',  size: 'M', targetDir: 1 },
+                    { id: 'p1',    x: -144, y:  -72, type: 'pin',     size: null },
+                    { id: 'p2',    x:   84, y:  -12, type: 'pin',     size: null },
+                    { id: 'p3',    x:  180, y:  -24, type: 'pin',     size: null },
+                    { id: 'p4',    x: -132, y:   72, type: 'pin',     size: null },
+                    { id: 'p5',    x:  -72, y:   72, type: 'pin',     size: null },
+                    { id: 'p6',    x:  180, y:   24, type: 'pin',     size: null },
+                    { id: 'p7',    x:  132, y:   24, type: 'pin',     size: null },
+                    { id: 'p8',    x:   24, y:  -72, type: 'pin',     size: null },
+                    { id: 'p9',    x:   96, y:  -72, type: 'pin',     size: null },
+                    { id: 'p10',   x: -180, y:   72, type: 'pin',     size: null }
+                ]
+            },
+            {
+                name: 'Подвижные оси',
+                hint: 'Оси на рельсах переставляются: нажми на свободную метку рельса. Для каждой такой оси подбери и положение, и размер шестерни.',
+                inventory: { S: 5, M: 4, L: 0 },
+                belts: [{ a: 'idlerA', b: 'trgA', cross: false }],
+                nodes: [
+                    { id: 'drvA',     x: -156, y:   36, type: 'driver',  size: 'L', dir: -1 },
+                    { id: 'drvB',     x:  144, y:   36, type: 'driver',  size: 'M', dir: 1 },
+                    { id: 'ratchetA', x:  132, y:  -72, type: 'ratchet', size: 'S', allowDir: 1 },
+                    { id: 'idlerA',   x:  -24, y:  -24, type: 'fixed',   size: 'S' },
+                    { id: 'rustA',    x:  -72, y:  -84, type: 'stuck',   size: 'S' },
+                    { id: 'trgA',     x: -168, y:  -84, type: 'target',  size: 'S', targetDir: 1, minSpeed: 1.9 },
+                    { id: 'trgB',     x:   36, y:  -12, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgC',     x:  -24, y:   84, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgD',     x:   36, y:  -84, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'p1',       x:  -72, y:  -24, type: 'pin',     size: null },
+                    { id: 'p2',       x:  132, y:  -24, type: 'pin',     size: null },
+                    { id: 'p3',       x:   84, y:  -72, type: 'pin',     size: null },
+                    { id: 'p4',       x: -168, y:  -36, type: 'pin',     size: null },
+                    { id: 'p5',       x:   84, y:  -24, type: 'pin',     size: null },
+                    { id: 'p6',       x: -120, y:  -72, type: 'pin',     size: null },
+                    { id: 'p7',       x:  -24, y:  -72, type: 'pin',     size: null },
+                    { id: 'p8',       x:  108, y:   84, type: 'pin',     size: null },
+                    { id: 'p9',       x:  180, y:  -12, type: 'pin',     size: null },
+                    { id: 'r1',       type: 'pin', size: null, slot: 1, rail: [{ x: -72, y: 36 }, { x: -72, y: 84 }] },
+                    { id: 'r2',       type: 'pin', size: null, slot: 1, rail: [{ x: -12, y: 36 }, { x: 24, y: 36 }] },
+                    { id: 'r3',       type: 'pin', size: null, slot: 0, rail: [{ x: 24, y: 84 }, { x: 72, y: 36 }] }
+                ]
+            },
+            {
+                name: 'Коробка передач',
+                hint: 'Рельсы, двойная ось и ремень вместе. Число на валу — точная скорость, «≤1x» — не быстрее мотора. Найди положения рельсов, потом кольцо для двойной оси.',
+                inventory: { S: 7, M: 2, L: 1 },
+                belts: [{ a: 'idlerA', b: 'trgB', cross: false }],
+                nodes: [
+                    { id: 'drvA',   x: -144, y:  -36, type: 'driver',  size: 'L', dir: 1 },
+                    { id: 'drvB',   x:  156, y:  -24, type: 'driver',  size: 'M', dir: -1 },
+                    { id: 'drvC',   x:  -24, y:  -84, type: 'driver',  size: 'S', dir: 1 },
+                    { id: 'idlerA', x:  -72, y:   24, type: 'fixed',   size: 'S' },
+                    { id: 'dualA',  x:  132, y:   72, type: 'dual',    base: 'S', size: null },
+                    { id: 'rustA',  x:   84, y:  -24, type: 'stuck',   size: 'S' },
+                    { id: 'trgA',   x:  -24, y:   72, type: 'target',  size: 'S', targetDir: 1, maxSpeed: 1 },
+                    { id: 'trgB',   x: -168, y:   60, type: 'target',  size: 'M', targetDir: 1 },
+                    { id: 'trgC',   x:  120, y:  -84, type: 'target',  size: 'S', targetDir: -1 },
+                    { id: 'trgD',   x:   60, y:   84, type: 'target',  size: 'S', targetDir: 1, exactSpeed: 3 },
+                    { id: 'p1',     x:  120, y:   24, type: 'pin',     size: null },
+                    { id: 'p2',     x:   24, y:  -84, type: 'pin',     size: null },
+                    { id: 'p3',     x:   24, y:  -36, type: 'pin',     size: null },
+                    { id: 'p4',     x:  180, y:   36, type: 'pin',     size: null },
+                    { id: 'p5',     x:  -24, y:  -24, type: 'pin',     size: null },
+                    { id: 'p6',     x:   60, y:   36, type: 'pin',     size: null },
+                    { id: 'p7',     x:   72, y:  -72, type: 'pin',     size: null },
+                    { id: 'p8',     x:  168, y:  -84, type: 'pin',     size: null },
+                    { id: 'r1',     type: 'pin', size: null, slot: 0, rail: [{ x: -24, y: 24 }, { x: 12, y: 24 }] },
+                    { id: 'r2',     type: 'pin', size: null, slot: 0, rail: [{ x: -72, y: -72 }, { x: -72, y: -24 }] }
+                ]
+            },
+            {
+                name: 'Большой механизм',
+                hint: 'Финал: две двойные оси, ржавые ловушки и валы с точной скоростью. Скорость вала — произведение передаточных чисел по всей цепочке от мотора.',
+                inventory: { S: 5, M: 4, L: 1 },
+                nodes: [
+                    { id: 'drvA',  x: -156, y:   24, type: 'driver',  size: 'L', dir: -1 },
+                    { id: 'drvB',  x:  120, y:  -24, type: 'driver',  size: 'S', dir: 1 },
+                    { id: 'dualA', x:  -36, y:   36, type: 'dual',    base: 'S', size: null },
+                    { id: 'dualB', x:   12, y:  -36, type: 'dual',    base: 'S', size: null },
+                    { id: 'rustA', x:   84, y:   36, type: 'stuck',   size: 'M' },
+                    { id: 'trgA',  x:  168, y:  -72, type: 'target',  size: 'S', targetDir: 1 },
+                    { id: 'trgB',  x:   24, y:  -84, type: 'target',  size: 'S', targetDir: 1, exactSpeed: 2 },
+                    { id: 'trgC',  x:  -96, y:  -72, type: 'target',  size: 'S', targetDir: -1, exactSpeed: 2 },
+                    { id: 'trgD',  x:  144, y:   72, type: 'target',  size: 'S', targetDir: -1 },
+                    { id: 'p1',    x: -156, y:  -60, type: 'pin',     size: null },
+                    { id: 'p2',    x:  168, y:  -24, type: 'pin',     size: null },
+                    { id: 'p3',    x:  156, y:   24, type: 'pin',     size: null },
+                    { id: 'p4',    x:  -84, y:   24, type: 'pin',     size: null },
+                    { id: 'p5',    x:  -48, y:  -24, type: 'pin',     size: null },
+                    { id: 'p6',    x:   12, y:   24, type: 'pin',     size: null },
+                    { id: 'p7',    x:   72, y:  -24, type: 'pin',     size: null },
+                    { id: 'p8',    x:   84, y:  -72, type: 'pin',     size: null },
+                    { id: 'p9',    x:  -96, y:   84, type: 'pin',     size: null },
+                    { id: 'p10',   x:  -36, y:  -84, type: 'pin',     size: null }
+                ]
             }
         ];
 
@@ -279,6 +579,9 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         this.isSolved = false;
         this.errorFlashNode = null;
         this.errorFlashTimer = 0;
+        this.errorFlashR = 0;
+        this.belts = [];
+        this.jamKind = null;
 
         this.bindEvents();
         this.loadLevel(0);
@@ -305,7 +608,7 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         const lvlInv = this.PUZZLE_LEVELS[this.currentLevelIdx].inventory;
         const used = { S: 0, M: 0, L: 0 };
         this.nodes.forEach(n => {
-            if (n.type === 'pin' && n.size) used[n.size]++;
+            if ((n.type === 'pin' || n.type === 'dual') && n.size) used[n.size]++;
         });
 
         ['S', 'M', 'L'].forEach(sz => {
@@ -331,12 +634,17 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
     loadLevel(idx) {
         this.currentLevelIdx = Math.max(0, Math.min(this.PUZZLE_LEVELS.length - 1, idx));
         const lvl = this.PUZZLE_LEVELS[this.currentLevelIdx];
-        this.nodes = lvl.nodes.map(n => ({
-            ...n,
-            phase0: 0,
-            speed: 0,
-            jammed: false
-        }));
+        this.nodes = lvl.nodes.map(n => {
+            const node = { ...n, phase0: 0, speed: 0, jammed: false };
+            if (n.rail) {
+                node.slot = n.slot || 0;
+                node.x = n.rail[node.slot].x;
+                node.y = n.rail[node.slot].y;
+            }
+            return node;
+        });
+        const byId = new Map(this.nodes.map(n => [n.id, n]));
+        this.belts = (lvl.belts || []).map(b => ({ a: byId.get(b.a), b: byId.get(b.b), cross: !!b.cross }));
         if (this.taskText) this.taskText.textContent = lvl.hint;
         this.updateInventoryUI();
         this.recalculateKinematics();
@@ -346,12 +654,19 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
     isTargetSatisfied(t) {
         if (this.isJammed || t.speed === 0) return false;
         if (Math.sign(t.speed) !== t.targetDir) return false;
-        if (t.minSpeed && Math.abs(t.speed) < t.minSpeed) return false;
-        return true;
+        return WG.targetSpeedState(t) === 'ok';
+    }
+
+    speedLabel(t) {
+        const fmt = v => String(Math.round(v * 100) / 100).replace('.', ',');
+        if (t.exactSpeed) return `${fmt(t.exactSpeed)}x`;
+        if (t.minSpeed) return t.minSpeed === 1.9 ? '2x' : `≥${fmt(t.minSpeed)}x`;
+        if (t.maxSpeed) return `≤${fmt(t.maxSpeed)}x`;
+        return '';
     }
 
     synchronizeToothPhases(activeNodes) {
-        const priority = { driver: 0, fixed: 1, pin: 2, target: 3 };
+        const priority = { driver: 0, fixed: 1, ratchet: 1, stuck: 1, dual: 1, pin: 2, target: 3 };
         const sorted = [...activeNodes].sort((a, b) => priority[a.type] - priority[b.type]);
         const visited = new Set();
 
@@ -363,20 +678,25 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
             const q = [rootNode];
             while (q.length > 0) {
                 const curr = q.shift();
-                const r1 = this.GEAR_SPECS[curr.size].radius;
-                const z1 = this.GEAR_SPECS[curr.size].teeth;
-                const dt1 = (Math.PI * 2) / z1;
+                const currRings = WG.gearRings(curr, this.GEAR_SPECS);
 
                 for (const next of activeNodes) {
                     if (visited.has(next) || next === curr) continue;
-                    const r2 = this.GEAR_SPECS[next.size].radius;
-                    const z2 = this.GEAR_SPECS[next.size].teeth;
                     const dist = Math.hypot(curr.x - next.x, curr.y - next.y);
+                    let linked = false;
 
-                    if (Math.abs(dist - (r1 + r2)) <= 2.5) {
-                        const alpha = Math.atan2(next.y - curr.y, next.x - curr.x);
-                        const dt2 = (Math.PI * 2) / z2;
-                        next.phase0 = (alpha + Math.PI) - dt2 * (0.5 - (alpha - curr.phase0) / dt1);
+                    for (const a of currRings) {
+                        for (const b of WG.gearRings(next, this.GEAR_SPECS)) {
+                            if (linked || Math.abs(dist - (a.radius + b.radius)) > WG.GEAR_TOL) continue;
+                            const alpha = Math.atan2(next.y - curr.y, next.x - curr.x);
+                            const dt1 = (Math.PI * 2) / a.teeth;
+                            const dt2 = (Math.PI * 2) / b.teeth;
+                            next.phase0 = (alpha + Math.PI) - dt2 * (0.5 - (alpha - curr.phase0) / dt1);
+                            linked = true;
+                        }
+                    }
+
+                    if (linked) {
                         visited.add(next);
                         q.push(next);
                     }
@@ -388,55 +708,14 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
     recalculateKinematics() {
         this.isJammed = false;
         this.isSolved = false;
+        this.jamKind = null;
 
-        this.nodes.forEach(n => {
-            n.speed = 0;
-            n.jammed = false;
-        });
-
-        const activeNodes = this.nodes.filter(n => n.size !== null);
+        const activeNodes = this.nodes.filter(n => WG.gearRings(n, this.GEAR_SPECS).length > 0);
         this.synchronizeToothPhases(activeNodes);
 
-        const queue = [];
-        activeNodes.forEach(n => {
-            if (n.type === 'driver') {
-                n.speed = n.dir * 1.0;
-                queue.push(n);
-            }
-        });
-
-        while (queue.length > 0) {
-            const curr = queue.shift();
-            const r1 = this.GEAR_SPECS[curr.size].radius;
-            const z1 = this.GEAR_SPECS[curr.size].teeth;
-
-            for (const next of activeNodes) {
-                if (next === curr) continue;
-                const r2 = this.GEAR_SPECS[next.size].radius;
-                const z2 = this.GEAR_SPECS[next.size].teeth;
-                const dist = Math.hypot(curr.x - next.x, curr.y - next.y);
-
-                if (Math.abs(dist - (r1 + r2)) <= 2.5) {
-                    const expectedSpeed = -curr.speed * (z1 / z2);
-
-                    if (next.speed === 0) {
-                        next.speed = expectedSpeed;
-                        queue.push(next);
-                    } else if (Math.abs(next.speed - expectedSpeed) > 0.05) {
-                        this.isJammed = true;
-                        curr.jammed = true;
-                        next.jammed = true;
-                    }
-                }
-            }
-        }
-
-        if (this.isJammed) {
-            activeNodes.forEach(n => {
-                if (n.speed !== 0) n.jammed = true;
-                n.speed = 0;
-            });
-        }
+        const result = WG.computeGearKinematics(this.nodes, this.belts, this.GEAR_SPECS);
+        this.isJammed = result.isJammed;
+        this.jamKind = result.jamKind;
 
         const targets = this.nodes.filter(n => n.type === 'target');
         this.isSolved = !this.isJammed && targets.every(t => this.isTargetSatisfied(t));
@@ -448,7 +727,12 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
 
         if (this.statusBadge) {
             if (this.isJammed) {
-                this.statusBadge.textContent = '⚠ Клин привода!';
+                const jamText = {
+                    stuck: '⚠ Задета ржавая шестерня!',
+                    ratchet: '⛔ Храповик стопорит!',
+                    conflict: '⚠ Клин привода!'
+                };
+                this.statusBadge.textContent = jamText[this.jamKind] || jamText.conflict;
                 this.statusBadge.style.borderColor = '#ef4444';
                 this.statusBadge.style.background = 'rgba(239, 68, 68, 0.22)';
             } else if (this.isSolved) {
@@ -458,12 +742,15 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
                 if (window.WG && WG.Engine) WG.Engine.boostGears(0.9, 1600);
             } else {
                 const wrongDir = targets.some(t => t.speed !== 0 && Math.sign(t.speed) !== t.targetDir);
-                const tooSlow = targets.some(t => t.speed !== 0 && Math.sign(t.speed) === t.targetDir && t.minSpeed && Math.abs(t.speed) < t.minSpeed);
+                const speedIssue = targets.find(t => t.speed !== 0 && Math.sign(t.speed) === t.targetDir && WG.targetSpeedState(t) !== 'ok');
 
                 if (wrongDir) {
                     this.statusBadge.textContent = '↺ Не та сторона!';
-                } else if (tooSlow) {
-                    this.statusBadge.textContent = '⚡ Медленно (нужно 2x)!';
+                } else if (speedIssue) {
+                    const need = this.speedLabel(speedIssue);
+                    this.statusBadge.textContent = WG.targetSpeedState(speedIssue) === 'slow'
+                        ? `⚡ Медленно (нужно ${need})!`
+                        : `🔥 Слишком быстро (нужно ${need})!`;
                 } else {
                     this.statusBadge.textContent = `Уровень ${this.currentLevelIdx + 1} / ${this.PUZZLE_LEVELS.length}`;
                 }
@@ -479,49 +766,57 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
             const physX = (pos.x - this.ORIGIN_X) / this.VIEW_SCALE;
             const physY = (pos.y - this.ORIGIN_Y) / this.VIEW_SCALE;
 
+            // A click on a free slot of a rail moves that axle there
             for (const node of this.nodes) {
-                if (node.type !== 'pin') continue;
-                const hitR = node.size ? this.GEAR_SPECS[node.size].radius : 24;
-
-                if (Math.hypot(physX - node.x, physY - node.y) <= hitR) {
-                    if (node.size !== null) {
-                        const removedSize = node.size;
-                        node.size = null;
-                        this.selectedSize = removedSize;
-                        this.sizeButtons.forEach(b => b.classList.toggle('active', b.dataset.gearSize === this.selectedSize));
-                        this.updateInventoryUI();
-                        this.recalculateKinematics();
+                if (!node.rail) continue;
+                for (let s = 0; s < node.rail.length; s++) {
+                    if (s === node.slot) continue;
+                    if (Math.hypot(physX - node.rail[s].x, physY - node.rail[s].y) <= 11) {
+                        this.moveRailPin(node, s);
                         return;
                     }
+                }
+            }
 
-                    if (this.remainingStock[this.selectedSize] <= 0) {
-                        this.errorFlashNode = node;
-                        this.errorFlashTimer = 20;
-                        return;
-                    }
+            for (const node of this.nodes) {
+                if (node.type !== 'pin' && node.type !== 'dual') continue;
+                const rings = WG.gearRings(node, this.GEAR_SPECS);
+                const hitR = rings.length ? Math.max(...rings.map(r => r.radius)) : 24;
+                if (Math.hypot(physX - node.x, physY - node.y) > hitR) continue;
 
-                    const candR = this.GEAR_SPECS[this.selectedSize].radius;
-                    let overlaps = false;
-                    for (const other of this.nodes) {
-                        if (other === node || other.size === null) continue;
-                        const otherR = this.GEAR_SPECS[other.size].radius;
-                        const dist = Math.hypot(node.x - other.x, node.y - other.y);
-                        if (dist < (candR + otherR) - 2.5) {
-                            overlaps = true;
-                            break;
-                        }
-                    }
-
-                    if (overlaps) {
-                        this.errorFlashNode = node;
-                        this.errorFlashTimer = 25;
-                    } else {
-                        node.size = this.selectedSize;
-                        this.updateInventoryUI();
-                        this.recalculateKinematics();
-                    }
+                if (node.size !== null) {
+                    const removedSize = node.size;
+                    node.size = null;
+                    this.selectedSize = removedSize;
+                    this.sizeButtons.forEach(b => b.classList.toggle('active', b.dataset.gearSize === this.selectedSize));
+                    this.updateInventoryUI();
+                    this.recalculateKinematics();
                     return;
                 }
+
+                if (this.remainingStock[this.selectedSize] <= 0) {
+                    this.flashError(node, this.GEAR_SPECS[this.selectedSize].radius, 20);
+                    return;
+                }
+
+                // A dual axle only takes a gear larger than its built-in ring
+                let blocked = node.type === 'dual' &&
+                    this.GEAR_SPECS[this.selectedSize].radius <= this.GEAR_SPECS[node.base].radius;
+                const candidate = { ...node, size: this.selectedSize };
+                for (const other of this.nodes) {
+                    if (blocked) break;
+                    if (other === node) continue;
+                    if (!WG.gearsCompatible(candidate, other, this.GEAR_SPECS)) blocked = true;
+                }
+
+                if (blocked) {
+                    this.flashError(node, this.GEAR_SPECS[this.selectedSize].radius, 25);
+                } else {
+                    node.size = this.selectedSize;
+                    this.updateInventoryUI();
+                    this.recalculateKinematics();
+                }
+                return;
             }
         });
 
@@ -545,6 +840,30 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         if (this.resetPuzzleBtn) {
             this.resetPuzzleBtn.addEventListener('click', () => this.loadLevel(this.currentLevelIdx));
         }
+    }
+
+    moveRailPin(node, slot) {
+        const spot = node.rail[slot];
+        if (node.size) {
+            const candidate = { ...node, x: spot.x, y: spot.y };
+            for (const other of this.nodes) {
+                if (other === node) continue;
+                if (!WG.gearsCompatible(candidate, other, this.GEAR_SPECS)) {
+                    this.flashError(spot, this.GEAR_SPECS[node.size].radius, 25);
+                    return;
+                }
+            }
+        }
+        node.slot = slot;
+        node.x = spot.x;
+        node.y = spot.y;
+        this.recalculateKinematics();
+    }
+
+    flashError(spot, radius, frames) {
+        this.errorFlashNode = spot;
+        this.errorFlashR = radius;
+        this.errorFlashTimer = frames;
     }
 
     drawGearShape(x, y, radius, teeth, angle, palette) {
@@ -611,7 +930,7 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         ctx.restore();
     }
 
-    drawDirectionArrow(x, y, dir, color, isTurbo = false) {
+    drawDirectionArrow(x, y, dir, color, label = '') {
         const ctx = this.ctx;
         ctx.save();
         ctx.translate(x, y);
@@ -649,15 +968,137 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         ctx.fill();
         ctx.restore();
 
-        if (isTurbo) {
+        if (label) {
             ctx.shadowBlur = 0;
-            ctx.font = 'bold 9px sans-serif';
+            ctx.font = label.length > 3 ? 'bold 7px sans-serif' : 'bold 9px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#09090b';
-            ctx.fillText('2x', 0, 0.5);
+            ctx.fillText(label, 0, 0.5);
         }
 
+        ctx.restore();
+    }
+
+    gearPalette(node, ring = 'main') {
+        if (node.jammed) return { fill: '#7f1d1d', stroke: '#ef4444', hub: '#fca5a5' };
+        if (node.type === 'driver') return { fill: '#92400e', stroke: '#f59e0b', hub: '#fde68a' };
+        if (node.type === 'fixed') return { fill: '#3f3f46', stroke: '#a1a1aa', hub: '#e4e4e7' };
+        if (node.type === 'ratchet') return { fill: '#134e4a', stroke: '#2dd4bf', hub: '#99f6e4' };
+        if (node.type === 'stuck') return { fill: '#431407', stroke: '#c2410c', hub: '#fdba74' };
+        if (node.type === 'dual' && ring === 'base') return { fill: '#2e1065', stroke: '#a78bfa', hub: '#ddd6fe' };
+        if (node.type === 'target') {
+            if (this.isTargetSatisfied(node)) return { fill: '#14532d', stroke: '#4ade80', hub: '#bbf7d0' };
+            if (node.speed !== 0) return { fill: '#7f1d1d', stroke: '#f87171', hub: '#fecaca' };
+            return { fill: '#1e293b', stroke: '#38bdf8', hub: '#bae6fd' };
+        }
+        return { fill: '#78350f', stroke: '#b45309', hub: '#d97706' };
+    }
+
+    drawBelt(belt) {
+        const ctx = this.ctx;
+        const a = belt.a;
+        const b = belt.b;
+        if (!a || !b) return;
+        const ringsA = WG.gearRings(a, this.GEAR_SPECS);
+        const ringsB = WG.gearRings(b, this.GEAR_SPECS);
+        const live = ringsA.length > 0 && ringsB.length > 0;
+        const r1 = (ringsA.length ? ringsA[0].radius : 12) - 6;
+        const r2 = (ringsB.length ? ringsB[0].radius : 12) - 6;
+        const dist = Math.hypot(b.x - a.x, b.y - a.y);
+        const k = belt.cross ? (r1 + r2) / dist : (r1 - r2) / dist;
+        if (Math.abs(k) >= 1) return;
+
+        const theta = Math.atan2(b.y - a.y, b.x - a.x);
+        const phi = Math.acos(k);
+        const far = belt.cross ? -1 : 1;
+        ctx.save();
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = !live ? 'rgba(113, 113, 122, 0.5)' : (a.speed !== 0 ? '#a1a1aa' : '#71717a');
+        if (!live) ctx.setLineDash([6, 6]);
+        for (const side of [1, -1]) {
+            const ang = theta + side * phi;
+            ctx.beginPath();
+            ctx.moveTo(a.x + r1 * Math.cos(ang), a.y + r1 * Math.sin(ang));
+            ctx.lineTo(b.x + far * r2 * Math.cos(ang), b.y + far * r2 * Math.sin(ang));
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    drawRail(node) {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        node.rail.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+        ctx.strokeStyle = '#27272a';
+        ctx.lineWidth = 9;
+        ctx.stroke();
+        ctx.strokeStyle = '#52525b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    drawRailSlots(node) {
+        const ctx = this.ctx;
+        node.rail.forEach((p, s) => {
+            if (s === node.slot) return;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#18181b';
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 1.6;
+            ctx.fill();
+            ctx.stroke();
+        });
+    }
+
+    drawPawl(node) {
+        const ctx = this.ctx;
+        const r = this.GEAR_SPECS[node.size].radius;
+        const d = node.allowDir;
+        ctx.save();
+        ctx.translate(node.x, node.y);
+        ctx.fillStyle = '#5eead4';
+        ctx.beginPath();
+        ctx.moveTo(7 * d, -r - 3);
+        ctx.lineTo(-5 * d, -r - 9);
+        ctx.lineTo(-5 * d, -r + 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    drawStuckMark(node) {
+        const ctx = this.ctx;
+        const s = this.GEAR_SPECS[node.size].radius * 0.42;
+        ctx.save();
+        ctx.strokeStyle = node.jammed ? '#fecaca' : '#fdba74';
+        ctx.lineWidth = 2.6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(node.x - s, node.y - s);
+        ctx.lineTo(node.x + s, node.y + s);
+        ctx.moveTo(node.x + s, node.y - s);
+        ctx.lineTo(node.x - s, node.y + s);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    drawDualMark(node) {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.strokeStyle = '#2e1065';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(node.x - 4.5, node.y);
+        ctx.lineTo(node.x + 4.5, node.y);
+        ctx.moveTo(node.x, node.y - 4.5);
+        ctx.lineTo(node.x, node.y + 4.5);
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -693,69 +1134,79 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         ctx.scale(this.VIEW_SCALE, this.VIEW_SCALE);
 
         this.nodes.forEach(node => {
-            if (node.size === null) {
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, 9.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#27272a';
-                ctx.strokeStyle = '#d97706';
-                ctx.lineWidth = 2;
-                ctx.fill();
-                ctx.stroke();
+            if (node.rail) this.drawRail(node);
+        });
+        this.belts.forEach(belt => this.drawBelt(belt));
 
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, 3.8, 0, Math.PI * 2);
-                ctx.fillStyle = '#fbbf24';
-                ctx.fill();
-            }
+        this.nodes.forEach(node => {
+            if (node.type !== 'pin' || node.size !== null) return;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 9.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#27272a';
+            ctx.strokeStyle = '#d97706';
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 3.8, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbbf24';
+            ctx.fill();
         });
 
         if (this.errorFlashTimer > 0 && this.errorFlashNode) {
             this.errorFlashTimer--;
             ctx.beginPath();
-            ctx.arc(this.errorFlashNode.x, this.errorFlashNode.y, this.GEAR_SPECS[this.selectedSize].radius, 0, Math.PI * 2);
+            ctx.arc(this.errorFlashNode.x, this.errorFlashNode.y, this.errorFlashR || this.GEAR_SPECS[this.selectedSize].radius, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(239, 68, 68, 0.78)';
             ctx.lineWidth = 2.5;
             ctx.stroke();
         }
 
+        const angleOf = node => node.phase0 + node.speed * this.masterPhase;
+
+        // the large ring a player put on a dual axle lies underneath
         this.nodes.forEach(node => {
-            if (!node.size) return;
+            if (node.type !== 'dual' || !node.size) return;
             const spec = this.GEAR_SPECS[node.size];
-            const currentAngle = node.phase0 + node.speed * this.masterPhase;
+            this.drawGearShape(node.x, node.y, spec.radius, spec.teeth, angleOf(node), this.gearPalette(node, 'added'));
+        });
 
-            let palette = { fill: '#78350f', stroke: '#b45309', hub: '#d97706' };
+        this.nodes.forEach(node => {
+            if (node.type === 'dual' || !node.size) return;
+            const spec = this.GEAR_SPECS[node.size];
+            this.drawGearShape(node.x, node.y, spec.radius, spec.teeth, angleOf(node), this.gearPalette(node));
+        });
 
-            if (node.jammed) {
-                palette = { fill: '#7f1d1d', stroke: '#ef4444', hub: '#fca5a5' };
-            } else if (node.type === 'driver') {
-                palette = { fill: '#92400e', stroke: '#f59e0b', hub: '#fde68a' };
-            } else if (node.type === 'fixed') {
-                palette = { fill: '#3f3f46', stroke: '#a1a1aa', hub: '#e4e4e7' };
-            } else if (node.type === 'target') {
-                const ok = this.isTargetSatisfied(node);
-                const spinningButWrong = node.speed !== 0 && !ok;
-                if (ok) {
-                    palette = { fill: '#14532d', stroke: '#4ade80', hub: '#bbf7d0' };
-                } else if (spinningButWrong) {
-                    palette = { fill: '#7f1d1d', stroke: '#f87171', hub: '#fecaca' };
-                } else {
-                    palette = { fill: '#1e293b', stroke: '#38bdf8', hub: '#bae6fd' };
-                }
-            }
+        // the built-in ring of a dual axle lies on top
+        this.nodes.forEach(node => {
+            if (node.type !== 'dual') return;
+            const spec = this.GEAR_SPECS[node.base];
+            this.drawGearShape(node.x, node.y, spec.radius, spec.teeth, angleOf(node), this.gearPalette(node, 'base'));
+            if (!node.size) this.drawDualMark(node);
+        });
 
-            this.drawGearShape(node.x, node.y, spec.radius, spec.teeth, currentAngle, palette);
-
+        this.nodes.forEach(node => {
             if (node.type === 'driver') {
-                this.drawDirectionArrow(node.x, node.y, node.dir, '#fde68a', false);
+                this.drawDirectionArrow(node.x, node.y, node.dir, '#fde68a');
             } else if (node.type === 'target') {
                 const ok = this.isTargetSatisfied(node);
-                const arrowColor = ok ? '#4ade80' : '#fbbf24';
-                this.drawDirectionArrow(node.x, node.y, node.targetDir, arrowColor, !!node.minSpeed);
+                this.drawDirectionArrow(node.x, node.y, node.targetDir, ok ? '#4ade80' : '#fbbf24', this.speedLabel(node));
+            } else if (node.type === 'ratchet') {
+                this.drawDirectionArrow(node.x, node.y, node.allowDir, '#5eead4');
+                this.drawPawl(node);
+            } else if (node.type === 'stuck') {
+                this.drawStuckMark(node);
             }
+        });
+
+        this.nodes.forEach(node => {
+            if (node.rail) this.drawRailSlots(node);
         });
 
         ctx.restore();
     }
+
 };
 
 document.addEventListener('DOMContentLoaded', () => {
