@@ -93,7 +93,7 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
             },
             {
                 name: 'Часовой лабиринт',
-                hint: 'Финальное испытание! От центрального мотора и паразитной шестерни запитай все 3 замка, использовав каждую деталь со склада и не угодив в треугольник клина.',
+                hint: 'От центрального мотора и паразитной шестерни запитай все 3 замка, использовав каждую деталь со склада и не угодив в треугольник клина.',
                 inventory: { S: 2, M: 1, L: 1 },
                 nodes: [
                     { id: 'drv',    x:   0, y:   0, type: 'driver', size: 'S', dir: 1 },
@@ -172,6 +172,90 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
                     { id: 'p9',    x:  168, y:   72, type: 'pin',    size: null },
                     { id: 'p10',   x:  -36, y:   84, type: 'pin',    size: null },
                     { id: 'p11',   x: -144, y:  -48, type: 'pin',    size: null }
+                ]
+            },
+            {
+                name: 'Три мотора',
+                hint: 'Три мотора, четыре вала — здесь нужен каждый мотор. Вал «2x» должен вращаться вдвое быстрее мотора: считай зубья мотора и вала, а не только направление.',
+                inventory: { S: 6, M: 4, L: 0 },
+                nodes: [
+                    { id: 'drvA',  x: -156, y:    0, type: 'driver', size: 'L', dir: 1 },
+                    { id: 'drvB',  x:  132, y:   24, type: 'driver', size: 'S', dir: -1 },
+                    { id: 'drvC',  x:  -12, y:   72, type: 'driver', size: 'M', dir: -1 },
+                    { id: 'idler', x:  168, y:  -84, type: 'fixed',  size: 'S' },
+                    { id: 'trgA',  x:   48, y:   36, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'trgB',  x: -168, y:   84, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'trgC',  x:   48, y:  -84, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'trg2x', x:   24, y:  -24, type: 'target', size: 'S', targetDir: -1, minSpeed: 1.9 },
+                    { id: 'p1',    x:  -84, y:    0, type: 'pin',    size: null },
+                    { id: 'p2',    x:  168, y:  -24, type: 'pin',    size: null },
+                    { id: 'p3',    x:  -72, y:   84, type: 'pin',    size: null },
+                    { id: 'p4',    x:    0, y:  -84, type: 'pin',    size: null },
+                    { id: 'p5',    x:  108, y:  -72, type: 'pin',    size: null },
+                    { id: 'p6',    x:   96, y:   72, type: 'pin',    size: null },
+                    { id: 'p7',    x: -120, y:   84, type: 'pin',    size: null },
+                    { id: 'p8',    x:  -96, y:  -48, type: 'pin',    size: null },
+                    { id: 'p9',    x:   84, y:  -12, type: 'pin',    size: null },
+                    { id: 'p10',   x:  180, y:   24, type: 'pin',    size: null },
+                    { id: 'p11',   x: -144, y:  -84, type: 'pin',    size: null },
+                    { id: 'p12',   x:  -36, y:  -36, type: 'pin',    size: null }
+                ]
+            },
+            {
+                name: 'Сцепка паразитов',
+                hint: 'Две паразитные шестерни зацеплены друг с другом: раскрутишь одну — вторая закрутится в обратную сторону. Считай чётность цепочки от каждого мотора до вала.',
+                inventory: { S: 6, M: 3, L: 1 },
+                nodes: [
+                    { id: 'drvA',   x: -144, y:   12, type: 'driver', size: 'L', dir: -1 },
+                    { id: 'drvB',   x:  144, y:  -72, type: 'driver', size: 'M', dir: 1 },
+                    { id: 'idlerA', x:   96, y:   12, type: 'fixed',  size: 'S' },
+                    { id: 'idlerB', x:  108, y:   60, type: 'fixed',  size: 'S' },
+                    { id: 'trgA',   x:   36, y:   72, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'trg2x',  x:   24, y:   12, type: 'target', size: 'S', targetDir: -1, minSpeed: 1.9 },
+                    { id: 'trgB',   x: -108, y:   84, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'trgC',   x:  168, y:   24, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'p1',     x:  -60, y:   84, type: 'pin',    size: null },
+                    { id: 'p2',     x:   96, y:  -36, type: 'pin',    size: null },
+                    { id: 'p3',     x:  -12, y:   60, type: 'pin',    size: null },
+                    { id: 'p4',     x:  -96, y:  -72, type: 'pin',    size: null },
+                    { id: 'p5',     x: -156, y:   84, type: 'pin',    size: null },
+                    { id: 'p6',     x:   24, y:  -36, type: 'pin',    size: null },
+                    { id: 'p7',     x:  156, y:   72, type: 'pin',    size: null },
+                    { id: 'p8',     x:  -48, y:  -36, type: 'pin',    size: null },
+                    { id: 'p9',     x:   60, y:  -84, type: 'pin',    size: null },
+                    { id: 'p10',    x:  -60, y:   24, type: 'pin',    size: null },
+                    { id: 'p11',    x: -156, y:  -72, type: 'pin',    size: null },
+                    { id: 'p12',    x:  -12, y:  -84, type: 'pin',    size: null }
+                ]
+            },
+            {
+                name: 'Финальный механизм',
+                hint: 'Пять валов, три мотора разного размера, два вала — «2x». Каждый вал берёт вращение у своего мотора, а сети разных моторов соединять нельзя — привод заклинит.',
+                inventory: { S: 6, M: 4, L: 1 },
+                nodes: [
+                    { id: 'drvA',   x: -144, y:  -12, type: 'driver', size: 'L', dir: -1 },
+                    { id: 'drvB',   x:  132, y:    0, type: 'driver', size: 'M', dir: -1 },
+                    { id: 'drvC',   x:   24, y:  -24, type: 'driver', size: 'S', dir: 1 },
+                    { id: 'idlerA', x:  -60, y:   36, type: 'fixed',  size: 'S' },
+                    { id: 'idlerB', x:  -48, y:   84, type: 'fixed',  size: 'S' },
+                    { id: 'trgA',   x:  -12, y:  -84, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'trg2x',  x: -144, y:   84, type: 'target', size: 'S', targetDir: 1, minSpeed: 1.9 },
+                    { id: 'trg2x2', x: -108, y:  -84, type: 'target', size: 'S', targetDir: -1, minSpeed: 1.9 },
+                    { id: 'trgB',   x:  144, y:  -84, type: 'target', size: 'S', targetDir: 1 },
+                    { id: 'trgC',   x:  132, y:   72, type: 'target', size: 'S', targetDir: -1 },
+                    { id: 'p1',     x:  -60, y:  -24, type: 'pin',    size: null },
+                    { id: 'p2',     x:   84, y:  -36, type: 'pin',    size: null },
+                    { id: 'p3',     x:   24, y:   24, type: 'pin',    size: null },
+                    { id: 'p4',     x:   36, y:  -72, type: 'pin',    size: null },
+                    { id: 'p5',     x:   96, y:  -84, type: 'pin',    size: null },
+                    { id: 'p6',     x: -156, y:  -84, type: 'pin',    size: null },
+                    { id: 'p7',     x:   72, y:   60, type: 'pin',    size: null },
+                    { id: 'p8',     x:  -96, y:   84, type: 'pin',    size: null },
+                    { id: 'p9',     x:   12, y:   84, type: 'pin',    size: null },
+                    { id: 'p10',    x:  180, y:   36, type: 'pin',    size: null },
+                    { id: 'p11',    x:  180, y:  -36, type: 'pin',    size: null },
+                    { id: 'p12',    x:  180, y:   84, type: 'pin',    size: null },
+                    { id: 'p13',    x:  -60, y:  -84, type: 'pin',    size: null }
                 ]
             }
         ];
@@ -531,9 +615,13 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         const ctx = this.ctx;
         ctx.save();
         ctx.translate(x, y);
+
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        ctx.shadowBlur = 4;
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
-        ctx.lineWidth = 2.2;
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
 
         const r = 13.5;
         ctx.beginPath();
@@ -547,11 +635,22 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
         const tipAngle = dir > 0 ? Math.PI * 0.25 : Math.PI * 0.75;
         const tx = Math.cos(tipAngle) * r;
         const ty = Math.sin(tipAngle) * r;
+        const tangent = tipAngle + (dir > 0 ? Math.PI / 2 : -Math.PI / 2);
+
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(tangent);
         ctx.beginPath();
-        ctx.arc(tx, ty, 3, 0, Math.PI * 2);
+        ctx.moveTo(4.5, 0);
+        ctx.lineTo(-4.5, -3.8);
+        ctx.lineTo(-2.2, 0);
+        ctx.lineTo(-4.5, 3.8);
+        ctx.closePath();
         ctx.fill();
+        ctx.restore();
 
         if (isTurbo) {
+            ctx.shadowBlur = 0;
             ctx.font = 'bold 9px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -650,7 +749,7 @@ WG.GearPuzzleWidget = class GearPuzzleWidget extends WG.CanvasWidget {
                 this.drawDirectionArrow(node.x, node.y, node.dir, '#fde68a', false);
             } else if (node.type === 'target') {
                 const ok = this.isTargetSatisfied(node);
-                const arrowColor = ok ? '#4ade80' : '#38bdf8';
+                const arrowColor = ok ? '#4ade80' : '#fbbf24';
                 this.drawDirectionArrow(node.x, node.y, node.targetDir, arrowColor, !!node.minSpeed);
             }
         });
